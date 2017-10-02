@@ -1,9 +1,9 @@
-#!/usr/bin/python3
+#!/usr/bin/python
 import subprocess
 import re
 import os
 import json
-
+from multiprocessing import Queue
 
 def execute(cmd):
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
@@ -19,10 +19,11 @@ def parse(queue):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     bin_path = os.path.join(dir_path, "ezconsole", "ezconsole")
     for line in execute(bin_path):
-            # values = json.load(line)
-            # print(values)
-            # queue.put(values)
-            lst = re.findall(r"[\w']+", line)
-            print(lst)
+        if "temperature" in line:
+            try:
+                # print(line)
+                values = json.loads(line)
+                queue.put(values)
+            except ValueError:
+                pass
 
-parse(1)

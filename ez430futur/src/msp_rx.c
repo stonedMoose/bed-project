@@ -114,7 +114,7 @@ static PT_THREAD(thread_uart(struct pt *pt))
 	PT_WAIT_UNTIL(pt, timer_reached(TIMER_UART, DELAY_UART));
 	led_green_flag=1;
 	int temperature = adc10_sample_temp();
-    printf("{\"id\" : 0, \"temperature\" : %d,%d}\n",temperature/10,temperature%10);
+    printf("{\"id\" : \"0\", \"temperature\" : \"%d,%d\"}\n",temperature/10,temperature%10);
     }
     
     PT_END(pt);

@@ -95,7 +95,7 @@ SYMBOL TABLE:
 0000002b g       *ABS*	00000000 __P2IFG
 0000001a g       *ABS*	00000000 __P3DIR
 0000888a g     F .text	0000001e CC2500_SPI_RX_FIFO_BYTE
-0000a59c g       *ABS*	00000000 _etext
+0000a5a0 g       *ABS*	00000000 _etext
 00000190 g       *ABS*	00000000 __TBR
 00009788 g     F .text	00000038 Timer_A
 0000908c g     F .text	000000dc cc2500_init
@@ -142,7 +142,7 @@ SYMBOL TABLE:
 000083a8 g     F .text	00000032 adc10_calibrate
 00000063 g       *ABS*	00000000 __UCA0BR1
 0000a4b2 g     F .text	00000000 __umoddi3
-0000a59c g       *ABS*	00000000 __data_load_start
+0000a5a0 g       *ABS*	00000000 __data_load_start
 000095c2 g     F .text	00000016 leds_on
 000080dc g       .text	00000000 __dtors_end
 00000053 g       *ABS*	00000000 __BCSCTL3
@@ -267,7 +267,7 @@ SYMBOL TABLE:
 0000006e g       *ABS*	00000000 __UCB0RXBUF
 000001b0 g       *ABS*	00000000 __ADC10CTL0
 00008738 g     F .text	00000036 CC2500_SPI_ROREG
-0000a570 g     O .rodata	00000024 rfSettings_default_config
+0000a574 g     O .rodata	00000024 rfSettings_default_config
 00009788 g       .text	00000000 __isr_9
 0000005e g       *ABS*	00000000 __UCA0IRTCTL
 000010fe g       *ABS*	00000000 __CALDCO_1MHZ
@@ -345,7 +345,7 @@ Disassembly of section .text:
     8018:	92 42 40 02 	mov	&0x0240,&0x0120	
     801c:	20 01 
     801e:	2f 83       	decd	r15		
-    8020:	9f 4f 9c a5 	mov	-23140(r15),512(r15);0xa59c(r15), 0x0200(r15)
+    8020:	9f 4f a0 a5 	mov	-23136(r15),512(r15);0xa5a0(r15), 0x0200(r15)
     8024:	00 02 
     8026:	f8 23       	jnz	$-14     	;abs 0x8018
 
@@ -658,7 +658,7 @@ static PT_THREAD(thread_uart(struct pt *pt))
 	int temperature = adc10_sample_temp();
     8222:	b0 12 00 84 	call	#0x8400	
     8226:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
-    printf("{\"id\" : 0, \"temperature\" : %d,%d}\n",temperature/10,temperature%10);
+    printf("{\"id\" : \"0\", \"temperature\" : \"%d,%d\"}\n",temperature/10,temperature%10);
     822a:	1f 44 f8 ff 	mov	-8(r4),	r15	;0xfff8(r4)
     822e:	3e 40 0a 00 	mov	#10,	r14	;#0x000a
     8232:	b0 12 70 9b 	call	#0x9b70	
@@ -735,7 +735,7 @@ void radio_cb(uint8_t *buffer, int size, int8_t rssi)
         {
             DBG_PRINTF("msg packet error size=%d\r\n",size);
     82d2:	14 12 fa ff 	push	-6(r4)		;0xfffa(r4)
-    82d6:	30 12 43 a5 	push	#-23229	;#0xa543
+    82d6:	30 12 47 a5 	push	#-23225	;#0xa547
     82da:	b0 12 9a 9b 	call	#0x9b9a	
     82de:	21 52       	add	#4,	r1	;r2 As==10
         }
@@ -824,7 +824,7 @@ void ezdisplay(char message[])
    // printf("{'id' : %c, 'temperature' : %d,%d}\n", mspid, msptemperature,msptemperaturefill);
     printf("fullmessage : %s\n", message);
     837e:	14 12 fc ff 	push	-4(r4)		;0xfffc(r4)
-    8382:	30 12 5e a5 	push	#-23202	;#0xa55e
+    8382:	30 12 62 a5 	push	#-23198	;#0xa562
     8386:	b0 12 9a 9b 	call	#0x9b9a	
     838a:	21 52       	add	#4,	r1	;r2 As==10
 }
@@ -833,96 +833,55 @@ void ezdisplay(char message[])
     8390:	30 41       	ret			
 
 00008392 <adc10_start>:
-/* **************************************************
- * 
- * **************************************************/
-
-void adc10_start(void)
-{
     8392:	04 12       	push	r4		
     8394:	04 41       	mov	r1,	r4	
     8396:	24 53       	incd	r4		
-		coeff_1 = 4230;
     8398:	b2 40 86 10 	mov	#4230,	&0x0220	;#0x1086
     839c:	20 02 
-		coeff_2 = 2780;
     839e:	b2 40 dc 0a 	mov	#2780,	&0x0222	;#0x0adc
     83a2:	22 02 
-}
     83a4:	34 41       	pop	r4		
     83a6:	30 41       	ret			
 
 000083a8 <adc10_calibrate>:
-
-void adc10_calibrate(uint16_t coeff1, uint16_t coeff2) {
     83a8:	04 12       	push	r4		
     83aa:	04 41       	mov	r1,	r4	
     83ac:	24 53       	incd	r4		
     83ae:	21 82       	sub	#4,	r1	;r2 As==10
     83b0:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     83b4:	84 4e fc ff 	mov	r14,	-4(r4)	;0xfffc(r4)
-	if (coeff1 !=0){
     83b8:	84 93 fa ff 	tst	-6(r4)		;0xfffa(r4)
     83bc:	04 24       	jz	$+10     	;abs 0x83c6
-		coeff_1 = coeff1;
     83be:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     83c2:	82 4f 20 02 	mov	r15,	&0x0220	
-	}
-	if (coeff2 !=0){
     83c6:	84 93 fc ff 	tst	-4(r4)		;0xfffc(r4)
     83ca:	04 24       	jz	$+10     	;abs 0x83d4
-		coeff_2 = coeff2;
     83cc:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     83d0:	82 4f 22 02 	mov	r15,	&0x0222	
-	}
-}
     83d4:	21 52       	add	#4,	r1	;r2 As==10
     83d6:	34 41       	pop	r4		
     83d8:	30 41       	ret			
 
 000083da <adc10_stop>:
-/* **************************************************
- * 
- * **************************************************/
-
-void adc10_stop(void)
-{
     83da:	04 12       	push	r4		
     83dc:	04 41       	mov	r1,	r4	
     83de:	24 53       	incd	r4		
-	//  ADC10CTL0  = 0;
-	ADC10CTL0 &= ~(REFON + ADC10ON);	// turn off A/D to save power
     83e0:	1f 42 b0 01 	mov	&0x01b0,r15	
     83e4:	3f f0 cf ff 	and	#-49,	r15	;#0xffcf
     83e8:	82 4f b0 01 	mov	r15,	&0x01b0	
-}
     83ec:	34 41       	pop	r4		
     83ee:	30 41       	ret			
 
 000083f0 <adc10irq>:
-/* **************************************************
- * 
- * **************************************************/
-
-ISR(ADC10, adc10irq)
-{
     83f0:	04 12       	push	r4		
     83f2:	04 41       	mov	r1,	r4	
     83f4:	24 53       	incd	r4		
-	LPM_OFF_ON_EXIT;
     83f6:	b4 c0 f0 00 	bic	#240,	0(r4)	;#0x00f0, 0x0000(r4)
     83fa:	00 00 
-}
     83fc:	34 41       	pop	r4		
     83fe:	00 13       	reti			
 
 00008400 <adc10_sample_temp>:
-
-#define TEMPOFFSET_ 0x10F4
-SFRB(TEMPOFFSET, TEMPOFFSET_);
-
-int adc10_sample_temp(void)
-{
     8400:	0b 12       	push	r11		
     8402:	0a 12       	push	r10		
     8404:	09 12       	push	r9		
@@ -931,47 +890,28 @@ int adc10_sample_temp(void)
     840a:	04 41       	mov	r1,	r4	
     840c:	34 50 0a 00 	add	#10,	r4	;#0x000a
     8410:	31 50 fa ff 	add	#-6,	r1	;#0xfffa
-	volatile long result;
-	int degC;
-
-	ADC10CTL1 = INCH_10 + ADC10DIV_4;	// Temp Sensor ADC10CLK/3
     8414:	b2 40 80 a0 	mov	#-24448,&0x01b2	;#0xa080
     8418:	b2 01 
-	ADC10CTL0 = SREF_1 + ADC10SHT_3 + REFON + ADC10ON + ADC10IE + ADC10SR;
     841a:	b2 40 38 3c 	mov	#15416,	&0x01b0	;#0x3c38
     841e:	b0 01 
-	loop_4_cycles(60);	// delay to allow reference to settle (240 cycles)
     8420:	3e 40 3c 00 	mov	#60,	r14	;#0x003c
     8424:	0f 43       	clr	r15		
     8426:	b0 12 ec 93 	call	#0x93ec	
-	ADC10CTL0 |= ENC + ADC10SC;	// Sampling and conversion start
     842a:	1f 42 b0 01 	mov	&0x01b0,r15	
     842e:	3f d0 03 00 	bis	#3,	r15	;#0x0003
     8432:	82 4f b0 01 	mov	r15,	&0x01b0	
-
-	LPM(0);
     8436:	32 d0 10 00 	bis	#16,	r2	;#0x0010
-
-	result = ADC10MEM;
     843a:	1f 42 b4 01 	mov	&0x01b4,r15	
     843e:	08 4f       	mov	r15,	r8	
     8440:	09 43       	clr	r9		
     8442:	84 48 f2 ff 	mov	r8,	-14(r4)	;0xfff2(r4)
     8446:	84 49 f4 ff 	mov	r9,	-12(r4)	;0xfff4(r4)
-	ADC10CTL0 &= ~ENC;
     844a:	1f 42 b0 01 	mov	&0x01b0,r15	
     844e:	3f f0 fd ff 	and	#-3,	r15	;#0xfffd
     8452:	82 4f b0 01 	mov	r15,	&0x01b0	
-	ADC10CTL0 &= ~(REFON + ADC10ON);	// turn off A/D to save power
     8456:	1f 42 b0 01 	mov	&0x01b0,r15	
     845a:	3f f0 cf ff 	and	#-49,	r15	;#0xffcf
     845e:	82 4f b0 01 	mov	r15,	&0x01b0	
-	// oC = ((A10/1024)*1500mV)-986mV)*1/3.55mV = A10*423/1024 - 278
-	// the temperature is transmitted as an integer where 32.1 = 321
-	// hence 4230 instead of 423
-	// VTEMP=0.00355(TEMPC)+0.986
-
-	degC = ((result * coeff_1) / 1024) - coeff_2;
     8462:	1f 42 20 02 	mov	&0x0220,r15	
     8466:	0a 4f       	mov	r15,	r10	
     8468:	0f 4a       	mov	r10,	r15	
@@ -1009,14 +949,7 @@ int adc10_sample_temp(void)
     84b2:	0d 8f       	sub	r15,	r13	
     84b4:	0f 4d       	mov	r13,	r15	
     84b6:	84 4f f0 ff 	mov	r15,	-16(r4)	;0xfff0(r4)
-
-	/*
-	   if( TEMPOFFSET != 0xFFFF )
-	   degC += TEMPOFFSET; 
-	 */
-	return degC;
     84ba:	1f 44 f0 ff 	mov	-16(r4),r15	;0xfff0(r4)
-}
     84be:	31 50 06 00 	add	#6,	r1	;#0x0006
     84c2:	34 41       	pop	r4		
     84c4:	38 41       	pop	r8		
@@ -1026,57 +959,34 @@ int adc10_sample_temp(void)
     84cc:	30 41       	ret			
 
 000084ce <adc10_sample_avcc>:
-/* **************************************************
- * 
- * **************************************************/
-
-int adc10_sample_avcc(void)
-{
     84ce:	0b 12       	push	r11		
     84d0:	0a 12       	push	r10		
     84d2:	04 12       	push	r4		
     84d4:	04 41       	mov	r1,	r4	
     84d6:	34 50 06 00 	add	#6,	r4	;#0x0006
     84da:	31 50 fa ff 	add	#-6,	r1	;#0xfffa
-	volatile long result;
-	unsigned int volt;
-
-	ADC10CTL1 = INCH_11;	// AVcc/2
     84de:	b2 40 00 b0 	mov	#-20480,&0x01b2	;#0xb000
     84e2:	b2 01 
-	ADC10CTL0 = SREF_1 + ADC10SHT_2 + REFON + ADC10ON + ADC10IE + REF2_5V;
     84e4:	b2 40 78 30 	mov	#12408,	&0x01b0	;#0x3078
     84e8:	b0 01 
-
-	loop_4_cycles(60);	// delay to allow reference to settle (240 cycles)
     84ea:	3e 40 3c 00 	mov	#60,	r14	;#0x003c
     84ee:	0f 43       	clr	r15		
     84f0:	b0 12 ec 93 	call	#0x93ec	
-
-	ADC10CTL0 |= ENC + ADC10SC;	// Sampling and conversion start
     84f4:	1f 42 b0 01 	mov	&0x01b0,r15	
     84f8:	3f d0 03 00 	bis	#3,	r15	;#0x0003
     84fc:	82 4f b0 01 	mov	r15,	&0x01b0	
-
-	LPM(0);
     8500:	32 d0 10 00 	bis	#16,	r2	;#0x0010
-
-	result = ADC10MEM;
     8504:	1f 42 b4 01 	mov	&0x01b4,r15	
     8508:	0a 4f       	mov	r15,	r10	
     850a:	0b 43       	clr	r11		
     850c:	84 4a f6 ff 	mov	r10,	-10(r4)	;0xfff6(r4)
     8510:	84 4b f8 ff 	mov	r11,	-8(r4)	;0xfff8(r4)
-	ADC10CTL0 &= ~ENC;
     8514:	1f 42 b0 01 	mov	&0x01b0,r15	
     8518:	3f f0 fd ff 	and	#-3,	r15	;#0xfffd
     851c:	82 4f b0 01 	mov	r15,	&0x01b0	
-	ADC10CTL0 &= ~(REFON + ADC10ON);	// turn off A/D to save power
     8520:	1f 42 b0 01 	mov	&0x01b0,r15	
     8524:	3f f0 cf ff 	and	#-49,	r15	;#0xffcf
     8528:	82 4f b0 01 	mov	r15,	&0x01b0	
-
-	volt = (result * 25) / 512;
     852c:	1a 44 f6 ff 	mov	-10(r4),r10	;0xfff6(r4)
     8530:	1b 44 f8 ff 	mov	-8(r4),	r11	;0xfff8(r4)
     8534:	0c 4a       	mov	r10,	r12	
@@ -1115,9 +1025,7 @@ int adc10_sample_avcc(void)
     8578:	0f 11       	rra	r15		
     857a:	0e 10       	rrc	r14		
     857c:	84 4e f4 ff 	mov	r14,	-12(r4)	;0xfff4(r4)
-	return volt;
     8580:	1f 44 f4 ff 	mov	-12(r4),r15	;0xfff4(r4)
-}
     8584:	31 50 06 00 	add	#6,	r1	;#0x0006
     8588:	34 41       	pop	r4		
     858a:	3a 41       	pop	r10		
@@ -1125,364 +1033,230 @@ int adc10_sample_avcc(void)
     858e:	30 41       	ret			
 
 00008590 <CC2500_HW_GDO0_IRQ_ON_ASSERT>:
-#define SIIF static inline int
-
-#define GDOPORT(x) P2##x
-
-SIVF CC2500_HW_GDO0_IRQ_ON_ASSERT(void)
-{
     8590:	04 12       	push	r4		
     8592:	04 41       	mov	r1,	r4	
     8594:	24 53       	incd	r4		
-	GDOPORT(IES) &= ~(GDO0_MASK);
     8596:	5f 42 2c 00 	mov.b	&0x002c,r15	
     859a:	7f f0 bf ff 	and.b	#-65,	r15	;#0xffbf
     859e:	c2 4f 2c 00 	mov.b	r15,	&0x002c	
-}
     85a2:	34 41       	pop	r4		
     85a4:	30 41       	ret			
 
 000085a6 <CC2500_HW_GDO2_IRQ_ON_ASSERT>:
-
-SIVF CC2500_HW_GDO2_IRQ_ON_ASSERT(void)
-{
     85a6:	04 12       	push	r4		
     85a8:	04 41       	mov	r1,	r4	
     85aa:	24 53       	incd	r4		
-	GDOPORT(IES) &= ~(GDO2_MASK);
     85ac:	5f 42 2c 00 	mov.b	&0x002c,r15	
     85b0:	7f f0 7f 00 	and.b	#127,	r15	;#0x007f
     85b4:	c2 4f 2c 00 	mov.b	r15,	&0x002c	
-}
     85b8:	34 41       	pop	r4		
     85ba:	30 41       	ret			
 
 000085bc <CC2500_HW_GDO0_DINT>:
-{
-	GDOPORT(IES) |= GDO2_MASK;
-}
-
-SIVF CC2500_HW_GDO0_DINT(void)
-{
     85bc:	04 12       	push	r4		
     85be:	04 41       	mov	r1,	r4	
     85c0:	24 53       	incd	r4		
-	GDOPORT(IE) &= ~(GDO0_MASK);
     85c2:	5f 42 2d 00 	mov.b	&0x002d,r15	
     85c6:	7f f0 bf ff 	and.b	#-65,	r15	;#0xffbf
     85ca:	c2 4f 2d 00 	mov.b	r15,	&0x002d	
-}
     85ce:	34 41       	pop	r4		
     85d0:	30 41       	ret			
 
 000085d2 <CC2500_HW_GDO2_DINT>:
-
-SIVF CC2500_HW_GDO2_DINT(void)
-{
     85d2:	04 12       	push	r4		
     85d4:	04 41       	mov	r1,	r4	
     85d6:	24 53       	incd	r4		
-	GDOPORT(IE) &= ~(GDO2_MASK);
     85d8:	5f 42 2d 00 	mov.b	&0x002d,r15	
     85dc:	7f f0 7f 00 	and.b	#127,	r15	;#0x007f
     85e0:	c2 4f 2d 00 	mov.b	r15,	&0x002d	
-}
     85e4:	34 41       	pop	r4		
     85e6:	30 41       	ret			
 
 000085e8 <CC2500_HW_GDO0_EINT>:
-
-SIVF CC2500_HW_GDO0_EINT(void)
-{
     85e8:	04 12       	push	r4		
     85ea:	04 41       	mov	r1,	r4	
     85ec:	24 53       	incd	r4		
-	GDOPORT(IE) |= GDO0_MASK;
     85ee:	5f 42 2d 00 	mov.b	&0x002d,r15	
     85f2:	7f d0 40 00 	bis.b	#64,	r15	;#0x0040
     85f6:	c2 4f 2d 00 	mov.b	r15,	&0x002d	
-}
     85fa:	34 41       	pop	r4		
     85fc:	30 41       	ret			
 
 000085fe <CC2500_HW_GDO0_CLEAR_FLAG>:
-{
-	GDOPORT(IE) |= GDO2_MASK;
-}
-
-SIVF CC2500_HW_GDO0_CLEAR_FLAG(void)
-{
     85fe:	04 12       	push	r4		
     8600:	04 41       	mov	r1,	r4	
     8602:	24 53       	incd	r4		
-	GDOPORT(IFG) &= ~(GDO0_MASK);
     8604:	5f 42 2b 00 	mov.b	&0x002b,r15	
     8608:	7f f0 bf ff 	and.b	#-65,	r15	;#0xffbf
     860c:	c2 4f 2b 00 	mov.b	r15,	&0x002b	
-}
     8610:	34 41       	pop	r4		
     8612:	30 41       	ret			
 
 00008614 <CC2500_HW_GDO2_CLEAR_FLAG>:
-
-SIVF CC2500_HW_GDO2_CLEAR_FLAG(void)
-{
     8614:	04 12       	push	r4		
     8616:	04 41       	mov	r1,	r4	
     8618:	24 53       	incd	r4		
-	GDOPORT(IFG) &= ~(GDO2_MASK);
     861a:	5f 42 2b 00 	mov.b	&0x002b,r15	
     861e:	7f f0 7f 00 	and.b	#127,	r15	;#0x007f
     8622:	c2 4f 2b 00 	mov.b	r15,	&0x002b	
-}
     8626:	34 41       	pop	r4		
     8628:	30 41       	ret			
 
 0000862a <CONFIG_GDO0_PIN_AS_INPUT>:
-{
-	return (GDOPORT(IN) >> GDO2_SHIFT) & 0x1;
-}
-
-SIVF CONFIG_GDO0_PIN_AS_INPUT(void)
-{
     862a:	04 12       	push	r4		
     862c:	04 41       	mov	r1,	r4	
     862e:	24 53       	incd	r4		
-	GDOPORT(SEL) &= ~(GDO0_MASK);
     8630:	5f 42 2e 00 	mov.b	&0x002e,r15	
     8634:	7f f0 bf ff 	and.b	#-65,	r15	;#0xffbf
     8638:	c2 4f 2e 00 	mov.b	r15,	&0x002e	
-}
     863c:	34 41       	pop	r4		
     863e:	30 41       	ret			
 
 00008640 <CC2500_HW_INIT>:
-{
-	return (GDOPORT(IN) & GDO0_MASK);
-}
-
-SIVF CC2500_HW_INIT(void)
-{
     8640:	04 12       	push	r4		
     8642:	04 41       	mov	r1,	r4	
     8644:	24 53       	incd	r4		
-	GDOPORT(SEL) &= ~(GDO0_MASK | GDO2_MASK);
     8646:	5f 42 2e 00 	mov.b	&0x002e,r15	
     864a:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     864e:	c2 4f 2e 00 	mov.b	r15,	&0x002e	
-	GDOPORT(DIR) &= ~(GDO0_MASK | GDO2_MASK);
     8652:	5f 42 2a 00 	mov.b	&0x002a,r15	
     8656:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     865a:	c2 4f 2a 00 	mov.b	r15,	&0x002a	
-	GDOPORT(IE) &= ~(GDO0_MASK | GDO2_MASK);
     865e:	5f 42 2d 00 	mov.b	&0x002d,r15	
     8662:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     8666:	c2 4f 2d 00 	mov.b	r15,	&0x002d	
-	GDOPORT(IES) &= ~(GDO0_MASK | GDO2_MASK);
     866a:	5f 42 2c 00 	mov.b	&0x002c,r15	
     866e:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     8672:	c2 4f 2c 00 	mov.b	r15,	&0x002c	
-	GDOPORT(IFG) &= ~(GDO0_MASK | GDO2_MASK);
     8676:	5f 42 2b 00 	mov.b	&0x002b,r15	
     867a:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     867e:	c2 4f 2b 00 	mov.b	r15,	&0x002b	
-	GDOPORT(REN) |= (GDO0_MASK | GDO2_MASK);
     8682:	5f 42 2f 00 	mov.b	&0x002f,r15	
     8686:	7f d0 c0 ff 	bis.b	#-64,	r15	;#0xffc0
     868a:	c2 4f 2f 00 	mov.b	r15,	&0x002f	
-}
     868e:	34 41       	pop	r4		
     8690:	30 41       	ret			
 
 00008692 <CC2500_SPI_TX>:
-#define CC2500_SPI_ENABLE()         spi_select_radio()
-#define CC2500_SPI_DISABLE()        spi_deselect_radio()
-#define CC2500_HW_CHECK_MISO_HIGH() spi_check_miso_high()
-
-void CC2500_SPI_TX(int x)
-{
     8692:	04 12       	push	r4		
     8694:	04 41       	mov	r1,	r4	
     8696:	24 53       	incd	r4		
     8698:	21 83       	decd	r1		
     869a:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	cc2500_status_register = spi_tx_rx(x);
     869e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     86a2:	b0 12 7a 96 	call	#0x967a	
     86a6:	4f 4f       	mov.b	r15,	r15	
     86a8:	c2 4f 3e 02 	mov.b	r15,	&0x023e	
-}
     86ac:	21 53       	incd	r1		
     86ae:	34 41       	pop	r4		
     86b0:	30 41       	ret			
 
 000086b2 <CC2500_SPI_STROBE>:
-
-#define CC2500_SPI_RX() spi_rx()
-
-void CC2500_SPI_STROBE(int s)
-{
     86b2:	04 12       	push	r4		
     86b4:	04 41       	mov	r1,	r4	
     86b6:	24 53       	incd	r4		
     86b8:	21 83       	decd	r1		
     86ba:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	CC2500_SPI_ENABLE();
     86be:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(s | CC2500_REG_ACCESS_OP_WRITE |
     86c2:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     86c6:	b0 12 92 86 	call	#0x8692	
-		      CC2500_REG_ACCESS_NOBURST);
-	CC2500_SPI_DISABLE();
     86ca:	b0 12 74 97 	call	#0x9774	
-}
     86ce:	21 53       	incd	r1		
     86d0:	34 41       	pop	r4		
     86d2:	30 41       	ret			
 
 000086d4 <CC2500_SPI_WREG>:
-
-void CC2500_SPI_WREG(int a, int v)
-{
     86d4:	04 12       	push	r4		
     86d6:	04 41       	mov	r1,	r4	
     86d8:	24 53       	incd	r4		
     86da:	21 82       	sub	#4,	r1	;r2 As==10
     86dc:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     86e0:	84 4e fc ff 	mov	r14,	-4(r4)	;0xfffc(r4)
-	CC2500_SPI_ENABLE();
     86e4:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(a | CC2500_REG_ACCESS_OP_WRITE |
     86e8:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     86ec:	b0 12 92 86 	call	#0x8692	
-		      CC2500_REG_ACCESS_NOBURST);
-	CC2500_SPI_TX(v);
     86f0:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     86f4:	b0 12 92 86 	call	#0x8692	
-	CC2500_SPI_DISABLE();
     86f8:	b0 12 74 97 	call	#0x9774	
-}
     86fc:	21 52       	add	#4,	r1	;r2 As==10
     86fe:	34 41       	pop	r4		
     8700:	30 41       	ret			
 
 00008702 <CC2500_SPI_RREG>:
-
-char CC2500_SPI_RREG(int a)
-{
     8702:	04 12       	push	r4		
     8704:	04 41       	mov	r1,	r4	
     8706:	24 53       	incd	r4		
     8708:	21 82       	sub	#4,	r1	;r2 As==10
     870a:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	char r;
-	CC2500_SPI_ENABLE();
     870e:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(a | CC2500_REG_ACCESS_OP_READ |
     8712:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8716:	3f d0 80 00 	bis	#128,	r15	;#0x0080
     871a:	b0 12 92 86 	call	#0x8692	
-		      CC2500_REG_ACCESS_NOBURST);
-	r = CC2500_SPI_RX();
     871e:	3f 40 55 00 	mov	#85,	r15	;#0x0055
     8722:	b0 12 7a 96 	call	#0x967a	
     8726:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	CC2500_SPI_DISABLE();
     872a:	b0 12 74 97 	call	#0x9774	
-	return r;
     872e:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
-}
     8732:	21 52       	add	#4,	r1	;r2 As==10
     8734:	34 41       	pop	r4		
     8736:	30 41       	ret			
 
 00008738 <CC2500_SPI_ROREG>:
-
-char CC2500_SPI_ROREG(int a)
-{
     8738:	04 12       	push	r4		
     873a:	04 41       	mov	r1,	r4	
     873c:	24 53       	incd	r4		
     873e:	21 82       	sub	#4,	r1	;r2 As==10
     8740:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	char r;
-	CC2500_SPI_ENABLE();
     8744:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(a | CC2500_REG_ACCESS_OP_READ | CC2500_REG_ACCESS_BURST);
     8748:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     874c:	3f d0 c0 00 	bis	#192,	r15	;#0x00c0
     8750:	b0 12 92 86 	call	#0x8692	
-	r = CC2500_SPI_RX();
     8754:	3f 40 55 00 	mov	#85,	r15	;#0x0055
     8758:	b0 12 7a 96 	call	#0x967a	
     875c:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	CC2500_SPI_DISABLE();
     8760:	b0 12 74 97 	call	#0x9774	
-	return r;
     8764:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
-}
     8768:	21 52       	add	#4,	r1	;r2 As==10
     876a:	34 41       	pop	r4		
     876c:	30 41       	ret			
 
 0000876e <CC2500_SPI_TX_BYTE>:
-
-void CC2500_SPI_TX_BYTE(int a, int v)
-{
     876e:	04 12       	push	r4		
     8770:	04 41       	mov	r1,	r4	
     8772:	24 53       	incd	r4		
     8774:	21 82       	sub	#4,	r1	;r2 As==10
     8776:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     877a:	84 4e fc ff 	mov	r14,	-4(r4)	;0xfffc(r4)
-	CC2500_SPI_ENABLE();
     877e:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(a);
     8782:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     8786:	b0 12 92 86 	call	#0x8692	
-	CC2500_SPI_TX(v);
     878a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     878e:	b0 12 92 86 	call	#0x8692	
-	CC2500_SPI_DISABLE();
     8792:	b0 12 74 97 	call	#0x9774	
-}
     8796:	21 52       	add	#4,	r1	;r2 As==10
     8798:	34 41       	pop	r4		
     879a:	30 41       	ret			
 
 0000879c <CC2500_SPI_RX_BYTE>:
-
-char CC2500_SPI_RX_BYTE(int a)
-{
     879c:	04 12       	push	r4		
     879e:	04 41       	mov	r1,	r4	
     87a0:	24 53       	incd	r4		
     87a2:	21 82       	sub	#4,	r1	;r2 As==10
     87a4:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	char r;
-	CC2500_SPI_ENABLE();
     87a8:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(a | CC2500_REG_ACCESS_OP_READ);
     87ac:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     87b0:	3f d0 80 00 	bis	#128,	r15	;#0x0080
     87b4:	b0 12 92 86 	call	#0x8692	
-	r = CC2500_SPI_RX();
     87b8:	3f 40 55 00 	mov	#85,	r15	;#0x0055
     87bc:	b0 12 7a 96 	call	#0x967a	
     87c0:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	CC2500_SPI_DISABLE();
     87c4:	b0 12 74 97 	call	#0x9774	
-	return r;
     87c8:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
-}
     87cc:	21 52       	add	#4,	r1	;r2 As==10
     87ce:	34 41       	pop	r4		
     87d0:	30 41       	ret			
 
 000087d2 <CC2500_SPI_TX_BURST>:
-
-void CC2500_SPI_TX_BURST(int addr, const char *val, int len)
-{
     87d2:	04 12       	push	r4		
     87d4:	04 41       	mov	r1,	r4	
     87d6:	24 53       	incd	r4		
@@ -1490,46 +1264,28 @@ void CC2500_SPI_TX_BURST(int addr, const char *val, int len)
     87da:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
     87de:	84 4e fa ff 	mov	r14,	-6(r4)	;0xfffa(r4)
     87e2:	84 4d fc ff 	mov	r13,	-4(r4)	;0xfffc(r4)
-	uint8_t cnt = 0;
     87e6:	c4 43 f6 ff 	mov.b	#0,	-10(r4)	;r3 As==00, 0xfff6(r4)
-	CC2500_SPI_ENABLE();
     87ea:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(addr | CC2500_REG_ACCESS_BURST);
     87ee:	1f 44 f8 ff 	mov	-8(r4),	r15	;0xfff8(r4)
     87f2:	3f d0 40 00 	bis	#64,	r15	;#0x0040
     87f6:	b0 12 92 86 	call	#0x8692	
-	for (cnt = 0; cnt < (len); cnt++) {
     87fa:	c4 43 f6 ff 	mov.b	#0,	-10(r4)	;r3 As==00, 0xfff6(r4)
     87fe:	0a 3c       	jmp	$+22     	;abs 0x8814
-		CC2500_SPI_TX(val[cnt]);
     8800:	5f 44 f6 ff 	mov.b	-10(r4),r15	;0xfff6(r4)
     8804:	1f 54 fa ff 	add	-6(r4),	r15	;0xfffa(r4)
     8808:	6f 4f       	mov.b	@r15,	r15	
     880a:	8f 11       	sxt	r15		
     880c:	b0 12 92 86 	call	#0x8692	
-void CC2500_SPI_TX_BURST(int addr, const char *val, int len)
-{
-	uint8_t cnt = 0;
-	CC2500_SPI_ENABLE();
-	CC2500_SPI_TX(addr | CC2500_REG_ACCESS_BURST);
-	for (cnt = 0; cnt < (len); cnt++) {
     8810:	d4 53 f6 ff 	inc.b	-10(r4)	;0xfff6(r4)
     8814:	5f 44 f6 ff 	mov.b	-10(r4),r15	;0xfff6(r4)
     8818:	1f 94 fc ff 	cmp	-4(r4),	r15	;0xfffc(r4)
     881c:	f1 3b       	jl	$-28     	;abs 0x8800
-		CC2500_SPI_TX(val[cnt]);
-	}
-	CC2500_SPI_DISABLE();
     881e:	b0 12 74 97 	call	#0x9774	
-}
     8822:	31 52       	add	#8,	r1	;r2 As==11
     8824:	34 41       	pop	r4		
     8826:	30 41       	ret			
 
 00008828 <CC2500_SPI_RX_BURST>:
-
-void CC2500_SPI_RX_BURST(int addr, uint8_t * val, int len)
-{
     8828:	0b 12       	push	r11		
     882a:	04 12       	push	r4		
     882c:	04 41       	mov	r1,	r4	
@@ -1538,19 +1294,13 @@ void CC2500_SPI_RX_BURST(int addr, uint8_t * val, int len)
     8832:	84 4f f6 ff 	mov	r15,	-10(r4)	;0xfff6(r4)
     8836:	84 4e f8 ff 	mov	r14,	-8(r4)	;0xfff8(r4)
     883a:	84 4d fa ff 	mov	r13,	-6(r4)	;0xfffa(r4)
-	uint8_t cnt = 0;
     883e:	c4 43 f4 ff 	mov.b	#0,	-12(r4)	;r3 As==00, 0xfff4(r4)
-	CC2500_SPI_ENABLE();
     8842:	b0 12 5e 97 	call	#0x975e	
-	CC2500_SPI_TX(addr | CC2500_REG_ACCESS_OP_READ |
     8846:	1f 44 f6 ff 	mov	-10(r4),r15	;0xfff6(r4)
     884a:	3f d0 c0 00 	bis	#192,	r15	;#0x00c0
     884e:	b0 12 92 86 	call	#0x8692	
-		      CC2500_REG_ACCESS_BURST);
-	for (cnt = 0; cnt < (len); cnt++) {
     8852:	c4 43 f4 ff 	mov.b	#0,	-12(r4)	;r3 As==00, 0xfff4(r4)
     8856:	0e 3c       	jmp	$+30     	;abs 0x8874
-		val[cnt] = (uint8_t) CC2500_SPI_RX();
     8858:	5f 44 f4 ff 	mov.b	-12(r4),r15	;0xfff4(r4)
     885c:	1b 44 f8 ff 	mov	-8(r4),	r11	;0xfff8(r4)
     8860:	0b 5f       	add	r15,	r11	
@@ -1558,67 +1308,37 @@ void CC2500_SPI_RX_BURST(int addr, uint8_t * val, int len)
     8866:	b0 12 7a 96 	call	#0x967a	
     886a:	4f 4f       	mov.b	r15,	r15	
     886c:	cb 4f 00 00 	mov.b	r15,	0(r11)	;0x0000(r11)
-{
-	uint8_t cnt = 0;
-	CC2500_SPI_ENABLE();
-	CC2500_SPI_TX(addr | CC2500_REG_ACCESS_OP_READ |
-		      CC2500_REG_ACCESS_BURST);
-	for (cnt = 0; cnt < (len); cnt++) {
     8870:	d4 53 f4 ff 	inc.b	-12(r4)	;0xfff4(r4)
     8874:	5f 44 f4 ff 	mov.b	-12(r4),r15	;0xfff4(r4)
     8878:	1f 94 fa ff 	cmp	-6(r4),	r15	;0xfffa(r4)
     887c:	ed 3b       	jl	$-36     	;abs 0x8858
-		val[cnt] = (uint8_t) CC2500_SPI_RX();
-	}
-	CC2500_SPI_DISABLE();
     887e:	b0 12 74 97 	call	#0x9774	
-}
     8882:	31 52       	add	#8,	r1	;r2 As==11
     8884:	34 41       	pop	r4		
     8886:	3b 41       	pop	r11		
     8888:	30 41       	ret			
 
 0000888a <CC2500_SPI_RX_FIFO_BYTE>:
-
-#define CC2500_SPI_TX_FIFO_BYTE(val)      CC2500_SPI_TX_BYTE (CC2500_DATA_FIFO_ADDR,val)
-#define CC2500_SPI_TX_FIFO_BURST(val,len) CC2500_SPI_TX_BURST(CC2500_DATA_FIFO_ADDR,val,len)
-
-char CC2500_SPI_RX_FIFO_BYTE()
-{
     888a:	04 12       	push	r4		
     888c:	04 41       	mov	r1,	r4	
     888e:	24 53       	incd	r4		
     8890:	21 83       	decd	r1		
-	unsigned char r;
-	r = CC2500_SPI_RX_BYTE(CC2500_DATA_FIFO_ADDR);
     8892:	3f 40 3f 00 	mov	#63,	r15	;#0x003f
     8896:	b0 12 9c 87 	call	#0x879c	
     889a:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	return r;
     889e:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
-}
     88a2:	21 53       	incd	r1		
     88a4:	34 41       	pop	r4		
     88a6:	30 41       	ret			
 
 000088a8 <cc2500_wait_status>:
-
-#define cc2500_get_state_from_status()   ((cc2500_status_register >> 4) & 0x07)
-#define cc2500_update_status()           CC2500_SPI_STROBE(CC2500_STROBE_SNOP)
-
-void cc2500_wait_status(uint8_t state)
-{
     88a8:	04 12       	push	r4		
     88aa:	04 41       	mov	r1,	r4	
     88ac:	24 53       	incd	r4		
     88ae:	21 82       	sub	#4,	r1	;r2 As==10
     88b0:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	uint8_t s;
-	do {
-		cc2500_update_status();
     88b4:	3f 40 3d 00 	mov	#61,	r15	;#0x003d
     88b8:	b0 12 b2 86 	call	#0x86b2	
-		s = cc2500_get_state_from_status();
     88bc:	5f 42 3e 02 	mov.b	&0x023e,r15	
     88c0:	4f 4f       	mov.b	r15,	r15	
     88c2:	4f 4f       	mov.b	r15,	r15	
@@ -1633,108 +1353,75 @@ void cc2500_wait_status(uint8_t state)
     88d4:	4e 4f       	mov.b	r15,	r14	
     88d6:	7e f0 07 00 	and.b	#7,	r14	;#0x0007
     88da:	c4 4e fa ff 	mov.b	r14,	-6(r4)	;0xfffa(r4)
-	} while (s != state);
     88de:	d4 94 fa ff 	cmp.b	-6(r4),	-4(r4)	;0xfffa(r4), 0xfffc(r4)
     88e2:	fc ff 
     88e4:	e7 23       	jnz	$-48     	;abs 0x88b4
-}
     88e6:	21 52       	add	#4,	r1	;r2 As==10
     88e8:	34 41       	pop	r4		
     88ea:	30 41       	ret			
 
 000088ec <cc2500_gdo0_set_signal>:
-
-void cc2500_gdo0_set_signal(uint8_t signal)
-{
     88ec:	04 12       	push	r4		
     88ee:	04 41       	mov	r1,	r4	
     88f0:	24 53       	incd	r4		
     88f2:	21 82       	sub	#4,	r1	;r2 As==10
     88f4:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	uint8_t reg = signal & 0x3F;
     88f8:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     88fc:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     8900:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	cc2500_gdo0_cfg = reg;
     8904:	d2 44 fa ff 	mov.b	-6(r4),	&0x023a	;0xfffa(r4)
     8908:	3a 02 
-	CC2500_SPI_WREG(CC2500_REG_IOCFG0, reg);
     890a:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
     890e:	0e 4f       	mov	r15,	r14	
     8910:	2f 43       	mov	#2,	r15	;r3 As==10
     8912:	b0 12 d4 86 	call	#0x86d4	
-}
     8916:	21 52       	add	#4,	r1	;r2 As==10
     8918:	34 41       	pop	r4		
     891a:	30 41       	ret			
 
 0000891c <cc2500_gdo2_set_signal>:
-
-void cc2500_gdo2_set_signal(uint8_t signal)
-{
     891c:	04 12       	push	r4		
     891e:	04 41       	mov	r1,	r4	
     8920:	24 53       	incd	r4		
     8922:	21 82       	sub	#4,	r1	;r2 As==10
     8924:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	uint8_t reg = signal & 0x3F;
     8928:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     892c:	7f f0 3f 00 	and.b	#63,	r15	;#0x003f
     8930:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	cc2500_gdo2_cfg = reg;
     8934:	d2 44 fa ff 	mov.b	-6(r4),	&0x0236	;0xfffa(r4)
     8938:	36 02 
-	CC2500_SPI_WREG(CC2500_REG_IOCFG2, reg);
     893a:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
     893e:	0e 4f       	mov	r15,	r14	
     8940:	0f 43       	clr	r15		
     8942:	b0 12 d4 86 	call	#0x86d4	
-}
     8946:	21 52       	add	#4,	r1	;r2 As==10
     8948:	34 41       	pop	r4		
     894a:	30 41       	ret			
 
 0000894c <cc2500_set_fifo_threshold>:
-
-void cc2500_set_fifo_threshold(uint8_t thr)
-{
     894c:	04 12       	push	r4		
     894e:	04 41       	mov	r1,	r4	
     8950:	24 53       	incd	r4		
     8952:	21 82       	sub	#4,	r1	;r2 As==10
     8954:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	uint8_t reg;
-	reg = (thr & 0x0F);
     8958:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     895c:	7f f0 0f 00 	and.b	#15,	r15	;#0x000f
     8960:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	CC2500_SPI_WREG(CC2500_REG_FIFOTHR, reg);
     8964:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
     8968:	0e 4f       	mov	r15,	r14	
     896a:	3f 40 03 00 	mov	#3,	r15	;#0x0003
     896e:	b0 12 d4 86 	call	#0x86d4	
-}
     8972:	21 52       	add	#4,	r1	;r2 As==10
     8974:	34 41       	pop	r4		
     8976:	30 41       	ret			
 
 00008978 <cc2500_check_tx_underflow>:
-/* **************************************************
- * RX overflow / TX underflow
- * **************************************************/
-
-static inline int cc2500_check_tx_underflow(void)
-{
     8978:	04 12       	push	r4		
     897a:	04 41       	mov	r1,	r4	
     897c:	24 53       	incd	r4		
     897e:	21 83       	decd	r1		
-	int ret;
-	cc2500_update_status();
     8980:	3f 40 3d 00 	mov	#61,	r15	;#0x003d
     8984:	b0 12 b2 86 	call	#0x86b2	
-	ret =
-	    (cc2500_get_state_from_status() == CC2500_STATUS_TXFIFO_UNDERFLOW);
     8988:	5f 42 3e 02 	mov.b	&0x023e,r15	
     898c:	4f 4f       	mov.b	r15,	r15	
     898e:	4f 4f       	mov.b	r15,	r15	
@@ -1749,38 +1436,23 @@ static inline int cc2500_check_tx_underflow(void)
     89a0:	4f 4f       	mov.b	r15,	r15	
     89a2:	0e 4f       	mov	r15,	r14	
     89a4:	3e f0 07 00 	and	#7,	r14	;#0x0007
-
-static inline int cc2500_check_tx_underflow(void)
-{
-	int ret;
-	cc2500_update_status();
-	ret =
     89a8:	1f 43       	mov	#1,	r15	;r3 As==01
     89aa:	3e 90 07 00 	cmp	#7,	r14	;#0x0007
     89ae:	01 24       	jz	$+4      	;abs 0x89b2
     89b0:	0f 43       	clr	r15		
     89b2:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	    (cc2500_get_state_from_status() == CC2500_STATUS_TXFIFO_UNDERFLOW);
-	return ret;
     89b6:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
-}
     89ba:	21 53       	incd	r1		
     89bc:	34 41       	pop	r4		
     89be:	30 41       	ret			
 
 000089c0 <cc2500_check_rx_overflow>:
-
-static inline int cc2500_check_rx_overflow(void)
-{
     89c0:	04 12       	push	r4		
     89c2:	04 41       	mov	r1,	r4	
     89c4:	24 53       	incd	r4		
     89c6:	21 83       	decd	r1		
-	char ret;
-	cc2500_update_status();
     89c8:	3f 40 3d 00 	mov	#61,	r15	;#0x003d
     89cc:	b0 12 b2 86 	call	#0x86b2	
-	ret = (cc2500_get_state_from_status() == CC2500_STATUS_RXFIFO_OVERFLOW);
     89d0:	5f 42 3e 02 	mov.b	&0x023e,r15	
     89d4:	4f 4f       	mov.b	r15,	r15	
     89d6:	4f 4f       	mov.b	r15,	r15	
@@ -1800,557 +1472,383 @@ static inline int cc2500_check_rx_overflow(void)
     89f6:	01 24       	jz	$+4      	;abs 0x89fa
     89f8:	4f 43       	clr.b	r15		
     89fa:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	return ret;
     89fe:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     8a02:	8f 11       	sxt	r15		
-}
     8a04:	21 53       	incd	r1		
     8a06:	34 41       	pop	r4		
     8a08:	30 41       	ret			
 
 00008a0a <cc2500_check_fifo_xflow_flush>:
-
-#define CC2500_FLUSH_RX()  CC2500_SPI_STROBE(CC2500_STROBE_SFRX)
-#define CC2500_FLUSH_TX()  CC2500_SPI_STROBE(CC2500_STROBE_SFTX)
-
-void cc2500_check_fifo_xflow_flush(void)
-{
     8a0a:	04 12       	push	r4		
     8a0c:	04 41       	mov	r1,	r4	
     8a0e:	24 53       	incd	r4		
-	if (cc2500_check_tx_underflow()) {
     8a10:	b0 12 78 89 	call	#0x8978	
     8a14:	0f 93       	tst	r15		
     8a16:	04 24       	jz	$+10     	;abs 0x8a20
-		CC2500_FLUSH_TX();
     8a18:	3f 40 3b 00 	mov	#59,	r15	;#0x003b
     8a1c:	b0 12 b2 86 	call	#0x86b2	
-	}
-	if (cc2500_check_rx_overflow()) {
     8a20:	b0 12 c0 89 	call	#0x89c0	
     8a24:	0f 93       	tst	r15		
     8a26:	04 24       	jz	$+10     	;abs 0x8a30
-		CC2500_FLUSH_RX();
     8a28:	3f 40 3a 00 	mov	#58,	r15	;#0x003a
     8a2c:	b0 12 b2 86 	call	#0x86b2	
-	}
-}
     8a30:	34 41       	pop	r4		
     8a32:	30 41       	ret			
 
 00008a34 <cc2500_configure>:
- ***************************************************************/
-
-#define PATABLE_VALUE     0xFE
-
-void cc2500_configure(RF_SETTINGS const *cfg)
-{
     8a34:	04 12       	push	r4		
     8a36:	04 41       	mov	r1,	r4	
     8a38:	24 53       	incd	r4		
     8a3a:	21 83       	decd	r1		
     8a3c:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	/* */
-	CC2500_SPI_WREG(CC2500_REG_FSCTRL1, cfg->fsctrl1);
     8a40:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8a44:	6f 4f       	mov.b	@r15,	r15	
     8a46:	4f 4f       	mov.b	r15,	r15	
     8a48:	0e 4f       	mov	r15,	r14	
     8a4a:	3f 40 0b 00 	mov	#11,	r15	;#0x000b
     8a4e:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FSCTRL0, cfg->fsctrl0);
     8a52:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8a56:	5f 4f 01 00 	mov.b	1(r15),	r15	;0x0001(r15)
     8a5a:	4f 4f       	mov.b	r15,	r15	
     8a5c:	0e 4f       	mov	r15,	r14	
     8a5e:	3f 40 0c 00 	mov	#12,	r15	;#0x000c
     8a62:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FREQ2, cfg->freq2);
     8a66:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8a6a:	5f 4f 02 00 	mov.b	2(r15),	r15	;0x0002(r15)
     8a6e:	4f 4f       	mov.b	r15,	r15	
     8a70:	0e 4f       	mov	r15,	r14	
     8a72:	3f 40 0d 00 	mov	#13,	r15	;#0x000d
     8a76:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FREQ1, cfg->freq1);
     8a7a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8a7e:	5f 4f 03 00 	mov.b	3(r15),	r15	;0x0003(r15)
     8a82:	4f 4f       	mov.b	r15,	r15	
     8a84:	0e 4f       	mov	r15,	r14	
     8a86:	3f 40 0e 00 	mov	#14,	r15	;#0x000e
     8a8a:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FREQ0, cfg->freq0);
     8a8e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8a92:	5f 4f 04 00 	mov.b	4(r15),	r15	;0x0004(r15)
     8a96:	4f 4f       	mov.b	r15,	r15	
     8a98:	0e 4f       	mov	r15,	r14	
     8a9a:	3f 40 0f 00 	mov	#15,	r15	;#0x000f
     8a9e:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_MDMCFG4, cfg->mdmcfg4);
     8aa2:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8aa6:	5f 4f 05 00 	mov.b	5(r15),	r15	;0x0005(r15)
     8aaa:	4f 4f       	mov.b	r15,	r15	
     8aac:	0e 4f       	mov	r15,	r14	
     8aae:	3f 40 10 00 	mov	#16,	r15	;#0x0010
     8ab2:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_MDMCFG3, cfg->mdmcfg3);
     8ab6:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8aba:	5f 4f 06 00 	mov.b	6(r15),	r15	;0x0006(r15)
     8abe:	4f 4f       	mov.b	r15,	r15	
     8ac0:	0e 4f       	mov	r15,	r14	
     8ac2:	3f 40 11 00 	mov	#17,	r15	;#0x0011
     8ac6:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_MDMCFG2, cfg->mdmcfg2);
     8aca:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8ace:	5f 4f 07 00 	mov.b	7(r15),	r15	;0x0007(r15)
     8ad2:	4f 4f       	mov.b	r15,	r15	
     8ad4:	0e 4f       	mov	r15,	r14	
     8ad6:	3f 40 12 00 	mov	#18,	r15	;#0x0012
     8ada:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_MDMCFG1, cfg->mdmcfg1);
     8ade:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8ae2:	5f 4f 08 00 	mov.b	8(r15),	r15	;0x0008(r15)
     8ae6:	4f 4f       	mov.b	r15,	r15	
     8ae8:	0e 4f       	mov	r15,	r14	
     8aea:	3f 40 13 00 	mov	#19,	r15	;#0x0013
     8aee:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_MDMCFG0, cfg->mdmcfg0);
     8af2:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8af6:	5f 4f 09 00 	mov.b	9(r15),	r15	;0x0009(r15)
     8afa:	4f 4f       	mov.b	r15,	r15	
     8afc:	0e 4f       	mov	r15,	r14	
     8afe:	3f 40 14 00 	mov	#20,	r15	;#0x0014
     8b02:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_CHANNR, cfg->channr);
     8b06:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b0a:	5f 4f 0a 00 	mov.b	10(r15),r15	;0x000a(r15)
     8b0e:	4f 4f       	mov.b	r15,	r15	
     8b10:	0e 4f       	mov	r15,	r14	
     8b12:	3f 40 0a 00 	mov	#10,	r15	;#0x000a
     8b16:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_DEVIATN, cfg->deviatn);
     8b1a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b1e:	5f 4f 0b 00 	mov.b	11(r15),r15	;0x000b(r15)
     8b22:	4f 4f       	mov.b	r15,	r15	
     8b24:	0e 4f       	mov	r15,	r14	
     8b26:	3f 40 15 00 	mov	#21,	r15	;#0x0015
     8b2a:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FREND1, cfg->frend1);
     8b2e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b32:	5f 4f 0c 00 	mov.b	12(r15),r15	;0x000c(r15)
     8b36:	4f 4f       	mov.b	r15,	r15	
     8b38:	0e 4f       	mov	r15,	r14	
     8b3a:	3f 40 21 00 	mov	#33,	r15	;#0x0021
     8b3e:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FREND0, cfg->frend0);
     8b42:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b46:	5f 4f 0d 00 	mov.b	13(r15),r15	;0x000d(r15)
     8b4a:	4f 4f       	mov.b	r15,	r15	
     8b4c:	0e 4f       	mov	r15,	r14	
     8b4e:	3f 40 22 00 	mov	#34,	r15	;#0x0022
     8b52:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_MCSM0, cfg->mcsm0);
     8b56:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b5a:	5f 4f 0e 00 	mov.b	14(r15),r15	;0x000e(r15)
     8b5e:	4f 4f       	mov.b	r15,	r15	
     8b60:	0e 4f       	mov	r15,	r14	
     8b62:	3f 40 18 00 	mov	#24,	r15	;#0x0018
     8b66:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FOCCFG, cfg->foccfg);
     8b6a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b6e:	5f 4f 0f 00 	mov.b	15(r15),r15	;0x000f(r15)
     8b72:	4f 4f       	mov.b	r15,	r15	
     8b74:	0e 4f       	mov	r15,	r14	
     8b76:	3f 40 19 00 	mov	#25,	r15	;#0x0019
     8b7a:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_BSCFG, cfg->bscfg);
     8b7e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b82:	5f 4f 10 00 	mov.b	16(r15),r15	;0x0010(r15)
     8b86:	4f 4f       	mov.b	r15,	r15	
     8b88:	0e 4f       	mov	r15,	r14	
     8b8a:	3f 40 1a 00 	mov	#26,	r15	;#0x001a
     8b8e:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_AGCCTRL2, cfg->agcctrl2);
     8b92:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8b96:	5f 4f 11 00 	mov.b	17(r15),r15	;0x0011(r15)
     8b9a:	4f 4f       	mov.b	r15,	r15	
     8b9c:	0e 4f       	mov	r15,	r14	
     8b9e:	3f 40 1b 00 	mov	#27,	r15	;#0x001b
     8ba2:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_AGCCTRL1, cfg->agcctrl1);
     8ba6:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8baa:	5f 4f 12 00 	mov.b	18(r15),r15	;0x0012(r15)
     8bae:	4f 4f       	mov.b	r15,	r15	
     8bb0:	0e 4f       	mov	r15,	r14	
     8bb2:	3f 40 1c 00 	mov	#28,	r15	;#0x001c
     8bb6:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_AGCCTRL0, cfg->agcctrl0);
     8bba:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8bbe:	5f 4f 13 00 	mov.b	19(r15),r15	;0x0013(r15)
     8bc2:	4f 4f       	mov.b	r15,	r15	
     8bc4:	0e 4f       	mov	r15,	r14	
     8bc6:	3f 40 1d 00 	mov	#29,	r15	;#0x001d
     8bca:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FSCAL3, cfg->fscal3);
     8bce:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8bd2:	5f 4f 14 00 	mov.b	20(r15),r15	;0x0014(r15)
     8bd6:	4f 4f       	mov.b	r15,	r15	
     8bd8:	0e 4f       	mov	r15,	r14	
     8bda:	3f 40 23 00 	mov	#35,	r15	;#0x0023
     8bde:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FSCAL2, cfg->fscal2);
     8be2:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8be6:	5f 4f 15 00 	mov.b	21(r15),r15	;0x0015(r15)
     8bea:	4f 4f       	mov.b	r15,	r15	
     8bec:	0e 4f       	mov	r15,	r14	
     8bee:	3f 40 24 00 	mov	#36,	r15	;#0x0024
     8bf2:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FSCAL1, cfg->fscal1);
     8bf6:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8bfa:	5f 4f 16 00 	mov.b	22(r15),r15	;0x0016(r15)
     8bfe:	4f 4f       	mov.b	r15,	r15	
     8c00:	0e 4f       	mov	r15,	r14	
     8c02:	3f 40 25 00 	mov	#37,	r15	;#0x0025
     8c06:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FSCAL0, cfg->fscal0);
     8c0a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c0e:	5f 4f 17 00 	mov.b	23(r15),r15	;0x0017(r15)
     8c12:	4f 4f       	mov.b	r15,	r15	
     8c14:	0e 4f       	mov	r15,	r14	
     8c16:	3f 40 26 00 	mov	#38,	r15	;#0x0026
     8c1a:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FSTEST, cfg->fstest);
     8c1e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c22:	5f 4f 18 00 	mov.b	24(r15),r15	;0x0018(r15)
     8c26:	4f 4f       	mov.b	r15,	r15	
     8c28:	0e 4f       	mov	r15,	r14	
     8c2a:	3f 40 29 00 	mov	#41,	r15	;#0x0029
     8c2e:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_TEST2, cfg->test2);
     8c32:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c36:	5f 4f 19 00 	mov.b	25(r15),r15	;0x0019(r15)
     8c3a:	4f 4f       	mov.b	r15,	r15	
     8c3c:	0e 4f       	mov	r15,	r14	
     8c3e:	3f 40 2c 00 	mov	#44,	r15	;#0x002c
     8c42:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_TEST1, cfg->test1);
     8c46:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c4a:	5f 4f 1a 00 	mov.b	26(r15),r15	;0x001a(r15)
     8c4e:	4f 4f       	mov.b	r15,	r15	
     8c50:	0e 4f       	mov	r15,	r14	
     8c52:	3f 40 2d 00 	mov	#45,	r15	;#0x002d
     8c56:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_TEST0, cfg->test0);
     8c5a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c5e:	5f 4f 1b 00 	mov.b	27(r15),r15	;0x001b(r15)
     8c62:	4f 4f       	mov.b	r15,	r15	
     8c64:	0e 4f       	mov	r15,	r14	
     8c66:	3f 40 2e 00 	mov	#46,	r15	;#0x002e
     8c6a:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_FIFOTHR, cfg->fifothr);
     8c6e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c72:	5f 4f 1c 00 	mov.b	28(r15),r15	;0x001c(r15)
     8c76:	4f 4f       	mov.b	r15,	r15	
     8c78:	0e 4f       	mov	r15,	r14	
     8c7a:	3f 40 03 00 	mov	#3,	r15	;#0x0003
     8c7e:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_IOCFG2, cfg->iocfg2);
     8c82:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c86:	5f 4f 1d 00 	mov.b	29(r15),r15	;0x001d(r15)
     8c8a:	4f 4f       	mov.b	r15,	r15	
     8c8c:	0e 4f       	mov	r15,	r14	
     8c8e:	0f 43       	clr	r15		
     8c90:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_IOCFG0, cfg->iocfg0d);
     8c94:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8c98:	5f 4f 1e 00 	mov.b	30(r15),r15	;0x001e(r15)
     8c9c:	4f 4f       	mov.b	r15,	r15	
     8c9e:	0e 4f       	mov	r15,	r14	
     8ca0:	2f 43       	mov	#2,	r15	;r3 As==10
     8ca2:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_PKTCTRL1, cfg->pktctrl1);
     8ca6:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8caa:	5f 4f 1f 00 	mov.b	31(r15),r15	;0x001f(r15)
     8cae:	4f 4f       	mov.b	r15,	r15	
     8cb0:	0e 4f       	mov	r15,	r14	
     8cb2:	3f 40 07 00 	mov	#7,	r15	;#0x0007
     8cb6:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_PKTCTRL0, cfg->pktctrl0);
     8cba:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8cbe:	5f 4f 20 00 	mov.b	32(r15),r15	;0x0020(r15)
     8cc2:	4f 4f       	mov.b	r15,	r15	
     8cc4:	0e 4f       	mov	r15,	r14	
     8cc6:	3f 42       	mov	#8,	r15	;r2 As==11
     8cc8:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_ADDR, cfg->addr);
     8ccc:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8cd0:	5f 4f 21 00 	mov.b	33(r15),r15	;0x0021(r15)
     8cd4:	4f 4f       	mov.b	r15,	r15	
     8cd6:	0e 4f       	mov	r15,	r14	
     8cd8:	3f 40 09 00 	mov	#9,	r15	;#0x0009
     8cdc:	b0 12 d4 86 	call	#0x86d4	
-	CC2500_SPI_WREG(CC2500_REG_PKTLEN, cfg->pktlen);
     8ce0:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     8ce4:	5f 4f 22 00 	mov.b	34(r15),r15	;0x0022(r15)
     8ce8:	4f 4f       	mov.b	r15,	r15	
     8cea:	0e 4f       	mov	r15,	r14	
     8cec:	3f 40 06 00 	mov	#6,	r15	;#0x0006
     8cf0:	b0 12 d4 86 	call	#0x86d4	
-
-	CC2500_SPI_WREG(CC2500_PATABLE_ADDR, PATABLE_VALUE);
     8cf4:	3e 40 fe 00 	mov	#254,	r14	;#0x00fe
     8cf8:	3f 40 3e 00 	mov	#62,	r15	;#0x003e
     8cfc:	b0 12 d4 86 	call	#0x86d4	
-     *******************/
-
-	// cc2500_calibrate();
-
-	/* GDO0 asserted when rx fifo above threshold */
-	cc2500_set_fifo_threshold(15);
     8d00:	7f 40 0f 00 	mov.b	#15,	r15	;#0x000f
     8d04:	b0 12 4c 89 	call	#0x894c	
-	cc2500_gdo0_set_signal(CC2500_GDOx_RX_FIFO_EOP);
     8d08:	5f 43       	mov.b	#1,	r15	;r3 As==01
     8d0a:	b0 12 ec 88 	call	#0x88ec	
-	CC2500_HW_GDO0_IRQ_ON_ASSERT();
     8d0e:	b0 12 90 85 	call	#0x8590	
-	CC2500_HW_GDO0_DINT();
     8d12:	b0 12 bc 85 	call	#0x85bc	
-
-	/* GDO2 Deasserted when packet rx/tx or fifo xxxflow */
-	cc2500_gdo2_set_signal(CC2500_GDOx_SYNC_WORD);
     8d16:	7f 40 06 00 	mov.b	#6,	r15	;#0x0006
     8d1a:	b0 12 1c 89 	call	#0x891c	
-	CC2500_HW_GDO2_IRQ_ON_ASSERT();
     8d1e:	b0 12 a6 85 	call	#0x85a6	
-	CC2500_HW_GDO2_DINT();
     8d22:	b0 12 d2 85 	call	#0x85d2	
-}
     8d26:	21 53       	incd	r1		
     8d28:	34 41       	pop	r4		
     8d2a:	30 41       	ret			
 
 00008d2c <cc2500_set_channel>:
-
-void cc2500_set_channel(uint8_t chan)
-{
     8d2c:	04 12       	push	r4		
     8d2e:	04 41       	mov	r1,	r4	
     8d30:	24 53       	incd	r4		
     8d32:	21 83       	decd	r1		
     8d34:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	CC2500_SPI_WREG(CC2500_REG_CHANNR, chan);
     8d38:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     8d3c:	0e 4f       	mov	r15,	r14	
     8d3e:	3f 40 0a 00 	mov	#10,	r15	;#0x000a
     8d42:	b0 12 d4 86 	call	#0x86d4	
-}
     8d46:	21 53       	incd	r1		
     8d48:	34 41       	pop	r4		
     8d4a:	30 41       	ret			
 
 00008d4c <cc2500_calibrate>:
-
-void cc2500_calibrate(void)
-{
     8d4c:	04 12       	push	r4		
     8d4e:	04 41       	mov	r1,	r4	
     8d50:	24 53       	incd	r4		
-	cc2500_idle();
     8d52:	b0 12 ec 8f 	call	#0x8fec	
-	CC2500_SPI_STROBE(CC2500_STROBE_SCAL);
     8d56:	3f 40 33 00 	mov	#51,	r15	;#0x0033
     8d5a:	b0 12 b2 86 	call	#0x86b2	
-	cc2500_wait_status(CC2500_STATUS_IDLE);
     8d5e:	4f 43       	clr.b	r15		
     8d60:	b0 12 a8 88 	call	#0x88a8	
-}
     8d64:	34 41       	pop	r4		
     8d66:	30 41       	ret			
 
 00008d68 <cc2500_utx>:
-/* this function does not require any interrupt handler  */
-/* both modes wtr. READ_TX_FIFO_BYTE should work equally */
-/* although register read might be cleaner               */
-
-void cc2500_utx(const char *buffer, const uint8_t length)
-{
     8d68:	04 12       	push	r4		
     8d6a:	04 41       	mov	r1,	r4	
     8d6c:	24 53       	incd	r4		
     8d6e:	31 50 fa ff 	add	#-6,	r1	;#0xfffa
     8d72:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     8d76:	c4 4e fc ff 	mov.b	r14,	-4(r4)	;0xfffc(r4)
-	DBG_PRINTF("utx_enter\n");
-	cc2500_idle();
     8d7a:	b0 12 ec 8f 	call	#0x8fec	
-
-	CC2500_HW_GDO2_DINT();
     8d7e:	b0 12 d2 85 	call	#0x85d2	
-
-	/* Fill tx fifo */
-	CC2500_SPI_TX_FIFO_BYTE(length);
     8d82:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     8d86:	0e 4f       	mov	r15,	r14	
     8d88:	3f 40 3f 00 	mov	#63,	r15	;#0x003f
     8d8c:	b0 12 6e 87 	call	#0x876e	
-	CC2500_SPI_TX_FIFO_BURST(buffer, length);
     8d90:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     8d94:	0d 4f       	mov	r15,	r13	
     8d96:	1e 44 fa ff 	mov	-6(r4),	r14	;0xfffa(r4)
     8d9a:	3f 40 3f 00 	mov	#63,	r15	;#0x003f
     8d9e:	b0 12 d2 87 	call	#0x87d2	
-	DBG_PRINTF("utx 1\n");
-
-	/* Send packet and wait for complete */
-	CC2500_SPI_STROBE(CC2500_STROBE_STX);
     8da2:	3f 40 35 00 	mov	#53,	r15	;#0x0035
     8da6:	b0 12 b2 86 	call	#0x86b2	
-#define     STOP_READ_TX_FIFO_BYTES
-#if defined(STOP_READ_TX_FIFO_BYTES)
-	{
-		uint8_t txbytes;
-		do {
-			txbytes = CC2500_SPI_ROREG(CC2500_REG_TXBYTES);
     8daa:	3f 40 3a 00 	mov	#58,	r15	;#0x003a
     8dae:	b0 12 38 87 	call	#0x8738	
     8db2:	c4 4f f8 ff 	mov.b	r15,	-8(r4)	;0xfff8(r4)
-		} while ((txbytes & 0x7f) > 0);
     8db6:	5f 44 f8 ff 	mov.b	-8(r4),	r15	;0xfff8(r4)
     8dba:	3f f0 7f 00 	and	#127,	r15	;#0x007f
     8dbe:	1f 93       	cmp	#1,	r15	;r3 As==01
     8dc0:	f4 37       	jge	$-22     	;abs 0x8daa
-	DBG_PRINTF("utx 3.1\n");
-	while ((CC2500_HW_GDO2_READ()) != 0) ;	/* GDO2 goes low  = EOP     */
-	DBG_PRINTF("utx 3.2\n");
-#endif
-
-	CC2500_HW_GDO0_CLEAR_FLAG();
     8dc2:	b0 12 fe 85 	call	#0x85fe	
-	CC2500_HW_GDO2_CLEAR_FLAG();
     8dc6:	b0 12 14 86 	call	#0x8614	
-	DBG_PRINTF("utx out\n");
-}
     8dca:	31 50 06 00 	add	#6,	r1	;#0x0006
     8dce:	34 41       	pop	r4		
     8dd0:	30 41       	ret			
 
 00008dd2 <cc2500_rx_register_buffer>:
-void cc2500_rx_register_buffer(uint8_t * buffer, uint8_t length);
-void cc2500_rx_enter(void);
-void cc2500_rx_pkt_eop(void);
-
-void cc2500_rx_register_buffer(uint8_t * buffer, uint8_t length)
-{
     8dd2:	04 12       	push	r4		
     8dd4:	04 41       	mov	r1,	r4	
     8dd6:	24 53       	incd	r4		
     8dd8:	21 82       	sub	#4,	r1	;r2 As==10
     8dda:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     8dde:	c4 4e fc ff 	mov.b	r14,	-4(r4)	;0xfffc(r4)
-	cc2500_rx_packet = buffer;
     8de2:	92 44 fa ff 	mov	-6(r4),	&0x023c	;0xfffa(r4)
     8de6:	3c 02 
-	cc2500_rx_offset = 0x00;
     8de8:	c2 43 24 02 	mov.b	#0,	&0x0224	;r3 As==00
-	CC2500_SPI_WREG(CC2500_REG_PKTLEN, length); /* simpler than testing in ISR */
     8dec:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     8df0:	0e 4f       	mov	r15,	r14	
     8df2:	3f 40 06 00 	mov	#6,	r15	;#0x0006
     8df6:	b0 12 d4 86 	call	#0x86d4	
-}
     8dfa:	21 52       	add	#4,	r1	;r2 As==10
     8dfc:	34 41       	pop	r4		
     8dfe:	30 41       	ret			
 
 00008e00 <cc2500_rx_enter>:
-
-void cc2500_rx_enter(void)
-{
     8e00:	04 12       	push	r4		
     8e02:	04 41       	mov	r1,	r4	
     8e04:	24 53       	incd	r4		
-	cc2500_idle();
     8e06:	b0 12 ec 8f 	call	#0x8fec	
-	cc2500_rx_offset = 0;
     8e0a:	c2 43 24 02 	mov.b	#0,	&0x0224	;r3 As==00
-
-	CC2500_HW_GDO0_CLEAR_FLAG();	/* clear pending irq     */
     8e0e:	b0 12 fe 85 	call	#0x85fe	
-	CC2500_HW_GDO2_CLEAR_FLAG();	/* clear pending irq     */
     8e12:	b0 12 14 86 	call	#0x8614	
-	CC2500_HW_GDO0_EINT();
     8e16:	b0 12 e8 85 	call	#0x85e8	
-	CC2500_HW_GDO2_DINT();
     8e1a:	b0 12 d2 85 	call	#0x85d2	
-
-	CC2500_SPI_STROBE(CC2500_STROBE_SRX);
     8e1e:	3f 40 34 00 	mov	#52,	r15	;#0x0034
     8e22:	b0 12 b2 86 	call	#0x86b2	
-	cc2500_wait_status(CC2500_STATUS_RX);
     8e26:	5f 43       	mov.b	#1,	r15	;r3 As==01
     8e28:	b0 12 a8 88 	call	#0x88a8	
-}
     8e2c:	34 41       	pop	r4		
     8e2e:	30 41       	ret			
 
 00008e30 <cc2500_rx_pkt_eop>:
-/* ****************** */
-/* ** RX EOP     **** */
-/* ****************** */
-
-void cc2500_rx_pkt_eop(void)
-{				/* called from IRQ context */
     8e30:	0b 12       	push	r11		
     8e32:	04 12       	push	r4		
     8e34:	04 41       	mov	r1,	r4	
     8e36:	24 52       	add	#4,	r4	;r2 As==10
     8e38:	31 50 f6 ff 	add	#-10,	r1	;#0xfff6
-	uint8_t rxbytes;
-	int l;
-
-	/* read RX bytes on general registers */
-	rxbytes = CC2500_SPI_ROREG(CC2500_REG_RXBYTES);
     8e3c:	3f 40 3b 00 	mov	#59,	r15	;#0x003b
     8e40:	b0 12 38 87 	call	#0x8738	
     8e44:	c4 4f f2 ff 	mov.b	r15,	-14(r4)	;0xfff2(r4)
-	do {
-		l = rxbytes;
     8e48:	d4 44 f2 ff 	mov.b	-14(r4),-10(r4)	;0xfff2(r4), 0xfff6(r4)
     8e4c:	f6 ff 
     8e4e:	c4 43 f7 ff 	mov.b	#0,	-9(r4)	;r3 As==00, 0xfff7(r4)
-		rxbytes = CC2500_SPI_ROREG(CC2500_REG_RXBYTES);
     8e52:	3f 40 3b 00 	mov	#59,	r15	;#0x003b
     8e56:	b0 12 38 87 	call	#0x8738	
     8e5a:	c4 4f f2 ff 	mov.b	r15,	-14(r4)	;0xfff2(r4)
-	} while (rxbytes < 2 && rxbytes != l);
     8e5e:	e4 93 f2 ff 	cmp.b	#2,	-14(r4)	;r3 As==10, 0xfff2(r4)
     8e62:	05 2c       	jc	$+12     	;abs 0x8e6e
     8e64:	5f 44 f2 ff 	mov.b	-14(r4),r15	;0xfff2(r4)
     8e68:	1f 94 f6 ff 	cmp	-10(r4),r15	;0xfff6(r4)
     8e6c:	ed 23       	jnz	$-36     	;abs 0x8e48
-
-	if ((0 < rxbytes)) {
     8e6e:	c4 93 f2 ff 	tst.b	-14(r4)	;0xfff2(r4)
     8e72:	68 24       	jz	$+210    	;abs 0x8f44
-		if ((rxbytes & 0x80) == 0) {	/* RX overflow == false */
     8e74:	5f 44 f2 ff 	mov.b	-14(r4),r15	;0xfff2(r4)
     8e78:	4f 93       	tst.b	r15		
     8e7a:	59 38       	jl	$+180    	;abs 0x8f2e
-
-			/*
-			 * This reads the first DATA bytes, this byte should be
-			 * equal to rxbytes-1 (rxbytes == size + data))
-			 */
-			size = CC2500_SPI_RX_FIFO_BYTE();
     8e7c:	b0 12 8a 88 	call	#0x888a	
     8e80:	c4 4f f8 ff 	mov.b	r15,	-8(r4)	;0xfff8(r4)
-			/* 
-			 * rxbytes can be different from size+1 
-			 * this happens on transmission errors 
-			 * (ex: if packets is filled with a serie of bytes eq 0)
-			 */
-			CC2500_SPI_RX_FIFO_BURST(cc2500_rx_packet, rxbytes - 1);
     8e84:	5f 44 f2 ff 	mov.b	-14(r4),r15	;0xfff2(r4)
     8e88:	0e 4f       	mov	r15,	r14	
     8e8a:	3e 53       	add	#-1,	r14	;r3 As==11
@@ -2359,23 +1857,15 @@ void cc2500_rx_pkt_eop(void)
     8e92:	0e 4f       	mov	r15,	r14	
     8e94:	3f 40 3f 00 	mov	#63,	r15	;#0x003f
     8e98:	b0 12 28 88 	call	#0x8828	
-#define FRAME_LQI_OFFSET  1
-#define rssi_offset       72
-
-			int rssi_dec;
-			int rssi_dbm;
-			rssi_dec = cc2500_rx_packet[size + FRAME_RSSI_OFFSET];
     8e9c:	1e 42 3c 02 	mov	&0x023c,r14	
     8ea0:	5f 44 f8 ff 	mov.b	-8(r4),	r15	;0xfff8(r4)
     8ea4:	0f 5e       	add	r14,	r15	
     8ea6:	6f 4f       	mov.b	@r15,	r15	
     8ea8:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
     8eac:	c4 43 fb ff 	mov.b	#0,	-5(r4)	;r3 As==00, 0xfffb(r4)
-			if (rssi_dec >= 128) {
     8eb0:	b4 90 80 00 	cmp	#128,	-6(r4)	;#0x0080, 0xfffa(r4)
     8eb4:	fa ff 
     8eb6:	0e 38       	jl	$+30     	;abs 0x8ed4
-				rssi_dbm = (rssi_dec - 256) / 2 - rssi_offset;
     8eb8:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     8ebc:	3f 50 00 ff 	add	#-256,	r15	;#0xff00
     8ec0:	0f 93       	tst	r15		
@@ -2386,8 +1876,6 @@ void cc2500_rx_pkt_eop(void)
     8eca:	3e 50 b8 ff 	add	#-72,	r14	;#0xffb8
     8ece:	84 4e f4 ff 	mov	r14,	-12(r4)	;0xfff4(r4)
     8ed2:	0b 3c       	jmp	$+24     	;abs 0x8eea
-			} else {
-				rssi_dbm = (rssi_dec) / 2 - rssi_offset;
     8ed4:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     8ed8:	0f 93       	tst	r15		
     8eda:	01 34       	jge	$+4      	;abs 0x8ede
@@ -2396,9 +1884,6 @@ void cc2500_rx_pkt_eop(void)
     8ee0:	0e 4f       	mov	r15,	r14	
     8ee2:	3e 50 b8 ff 	add	#-72,	r14	;#0xffb8
     8ee6:	84 4e f4 ff 	mov	r14,	-12(r4)	;0xfff4(r4)
-			}
-
-			if (cc2500_rx_packet[size + FRAME_LQI_OFFSET] & 0x80) {	/* crc ok */
     8eea:	1e 42 3c 02 	mov	&0x023c,r14	
     8eee:	5f 44 f8 ff 	mov.b	-8(r4),	r15	;0xfff8(r4)
     8ef2:	1f 53       	inc	r15		
@@ -2406,8 +1891,6 @@ void cc2500_rx_pkt_eop(void)
     8ef6:	6f 4f       	mov.b	@r15,	r15	
     8ef8:	4f 93       	tst.b	r15		
     8efa:	0e 34       	jge	$+30     	;abs 0x8f18
-				/* ok */
-				radio_rx_cb(cc2500_rx_packet, size, rssi_dbm);
     8efc:	1c 42 38 02 	mov	&0x0238,r12	
     8f00:	1f 44 f4 ff 	mov	-12(r4),r15	;0xfff4(r4)
     8f04:	4e 4f       	mov.b	r15,	r14	
@@ -2418,101 +1901,65 @@ void cc2500_rx_pkt_eop(void)
     8f12:	0f 4b       	mov	r11,	r15	
     8f14:	8c 12       	call	r12		
     8f16:	1f 3c       	jmp	$+64     	;abs 0x8f56
-			} else {
-				cc2500_check_fifo_xflow_flush();
     8f18:	b0 12 0a 8a 	call	#0x8a0a	
-				radio_rx_cb(cc2500_rx_packet, -ERXBADCRC, 0);
     8f1c:	1c 42 38 02 	mov	&0x0238,r12	
     8f20:	1f 42 3c 02 	mov	&0x023c,r15	
     8f24:	4d 43       	clr.b	r13		
     8f26:	3e 40 fd ff 	mov	#-3,	r14	;#0xfffd
     8f2a:	8c 12       	call	r12		
     8f2c:	14 3c       	jmp	$+42     	;abs 0x8f56
-			}
-		} else {
-			cc2500_check_fifo_xflow_flush();
     8f2e:	b0 12 0a 8a 	call	#0x8a0a	
-			radio_rx_cb(cc2500_rx_packet, -ERXFLOW, 0);
     8f32:	1c 42 38 02 	mov	&0x0238,r12	
     8f36:	1f 42 3c 02 	mov	&0x023c,r15	
     8f3a:	4d 43       	clr.b	r13		
     8f3c:	3e 40 fe ff 	mov	#-2,	r14	;#0xfffe
     8f40:	8c 12       	call	r12		
     8f42:	09 3c       	jmp	$+20     	;abs 0x8f56
-		}
-	} else {
-		cc2500_check_fifo_xflow_flush();
     8f44:	b0 12 0a 8a 	call	#0x8a0a	
-		radio_rx_cb(cc2500_rx_packet, -EEMPTY, 0);
     8f48:	1c 42 38 02 	mov	&0x0238,r12	
     8f4c:	1f 42 3c 02 	mov	&0x023c,r15	
     8f50:	4d 43       	clr.b	r13		
     8f52:	3e 43       	mov	#-1,	r14	;r3 As==11
     8f54:	8c 12       	call	r12		
-	}
-
-	CC2500_HW_GDO0_CLEAR_FLAG();
     8f56:	b0 12 fe 85 	call	#0x85fe	
-	CC2500_HW_GDO2_CLEAR_FLAG();
     8f5a:	b0 12 14 86 	call	#0x8614	
-}
     8f5e:	31 50 0a 00 	add	#10,	r1	;#0x000a
     8f62:	34 41       	pop	r4		
     8f64:	3b 41       	pop	r11		
     8f66:	30 41       	ret			
 
 00008f68 <cc2500_rx_register_cb>:
-/* **************************************************
- * utils
- * **************************************************/
-
-void cc2500_rx_register_cb(cc2500_cb_t f)
-{
     8f68:	04 12       	push	r4		
     8f6a:	04 41       	mov	r1,	r4	
     8f6c:	24 53       	incd	r4		
     8f6e:	21 83       	decd	r1		
     8f70:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	radio_rx_cb = f;
     8f74:	92 44 fc ff 	mov	-4(r4),	&0x0238	;0xfffc(r4)
     8f78:	38 02 
-}
     8f7a:	21 53       	incd	r1		
     8f7c:	34 41       	pop	r4		
     8f7e:	30 41       	ret			
 
 00008f80 <cc2500_packet_status>:
-
-uint8_t cc2500_packet_status(void)
-{
     8f80:	04 12       	push	r4		
     8f82:	04 41       	mov	r1,	r4	
     8f84:	24 53       	incd	r4		
     8f86:	21 83       	decd	r1		
-	uint8_t ps;
-	ps = CC2500_SPI_ROREG(CC2500_REG_PKTSTATUS);
     8f88:	3f 40 38 00 	mov	#56,	r15	;#0x0038
     8f8c:	b0 12 38 87 	call	#0x8738	
     8f90:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	return ps;
     8f94:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
-}
     8f98:	21 53       	incd	r1		
     8f9a:	34 41       	pop	r4		
     8f9c:	30 41       	ret			
 
 00008f9e <cc2500_cca>:
-
-int cc2500_cca(void)
-{
     8f9e:	04 12       	push	r4		
     8fa0:	04 41       	mov	r1,	r4	
     8fa2:	24 53       	incd	r4		
     8fa4:	21 83       	decd	r1		
-	uint8_t cca = cc2500_packet_status();
     8fa6:	b0 12 80 8f 	call	#0x8f80	
     8faa:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	return (cca >> 4) & 0x01;
     8fae:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     8fb2:	4f 4f       	mov.b	r15,	r15	
     8fb4:	12 c3       	clrc			
@@ -2525,251 +1972,127 @@ int cc2500_cca(void)
     8fc2:	4f 10       	rrc.b	r15		
     8fc4:	4f 4f       	mov.b	r15,	r15	
     8fc6:	1f f3       	and	#1,	r15	;r3 As==01
-}
     8fc8:	21 53       	incd	r1		
     8fca:	34 41       	pop	r4		
     8fcc:	30 41       	ret			
 
 00008fce <cc2500_get_rssi>:
-
-uint8_t cc2500_get_rssi(void)
-{
     8fce:	04 12       	push	r4		
     8fd0:	04 41       	mov	r1,	r4	
     8fd2:	24 53       	incd	r4		
     8fd4:	21 83       	decd	r1		
-	uint8_t rssi;
-	/* cc2500 should be in Rx */
-	rssi = CC2500_SPI_ROREG(CC2500_REG_RSSI);
     8fd6:	3f 40 34 00 	mov	#52,	r15	;#0x0034
     8fda:	b0 12 38 87 	call	#0x8738	
     8fde:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	return rssi;
     8fe2:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
-}
     8fe6:	21 53       	incd	r1		
     8fe8:	34 41       	pop	r4		
     8fea:	30 41       	ret			
 
 00008fec <cc2500_idle>:
-
-/* idle mode
- * - wait for idle
- */
-void cc2500_idle(void)
-{
     8fec:	04 12       	push	r4		
     8fee:	04 41       	mov	r1,	r4	
     8ff0:	24 53       	incd	r4		
-	CC2500_HW_GDO0_DINT();
     8ff2:	b0 12 bc 85 	call	#0x85bc	
-	CC2500_HW_GDO2_DINT();
     8ff6:	b0 12 d2 85 	call	#0x85d2	
-	cc2500_check_fifo_xflow_flush();
     8ffa:	b0 12 0a 8a 	call	#0x8a0a	
-	CC2500_SPI_STROBE(CC2500_STROBE_SIDLE);
     8ffe:	3f 40 36 00 	mov	#54,	r15	;#0x0036
     9002:	b0 12 b2 86 	call	#0x86b2	
-	cc2500_wait_status(CC2500_STATUS_IDLE);
     9006:	4f 43       	clr.b	r15		
     9008:	b0 12 a8 88 	call	#0x88a8	
-}
     900c:	34 41       	pop	r4		
     900e:	30 41       	ret			
 
 00009010 <cc2500_sleep>:
- * - crystal is off
- * - configuration saved except power table and test registers
- * - calibration and power table update needed after sleep
- */
-void cc2500_sleep(void)
-{
     9010:	04 12       	push	r4		
     9012:	04 41       	mov	r1,	r4	
     9014:	24 53       	incd	r4		
-	CC2500_SPI_STROBE(CC2500_STROBE_SPWD);
     9016:	3f 40 39 00 	mov	#57,	r15	;#0x0039
     901a:	b0 12 b2 86 	call	#0x86b2	
-}
     901e:	34 41       	pop	r4		
     9020:	30 41       	ret			
 
 00009022 <cc2500_reset>:
-/* **************************************************
- * Init / Reset
- * **************************************************/
-
-void cc2500_reset(void)
-{
     9022:	04 12       	push	r4		
     9024:	04 41       	mov	r1,	r4	
     9026:	24 53       	incd	r4		
-	CC2500_SPI_STROBE(CC2500_STROBE_SRES);
     9028:	3f 40 30 00 	mov	#48,	r15	;#0x0030
     902c:	b0 12 b2 86 	call	#0x86b2	
-	cc2500_wait_status(CC2500_STATUS_IDLE);
     9030:	4f 43       	clr.b	r15		
     9032:	b0 12 a8 88 	call	#0x88a8	
-}
     9036:	34 41       	pop	r4		
     9038:	30 41       	ret			
 
 0000903a <cc2500_wakeup>:
-
-void cc2500_wakeup(void)
-{
     903a:	04 12       	push	r4		
     903c:	04 41       	mov	r1,	r4	
     903e:	24 53       	incd	r4		
-	CC2500_SPI_ENABLE();
     9040:	b0 12 5e 97 	call	#0x975e	
-	/* wait for MISO to go high indicating the oscillator is stable */
-	while (CC2500_HW_CHECK_MISO_HIGH()) ;
     9044:	03 43       	nop			
     9046:	b0 12 b4 96 	call	#0x96b4	
     904a:	0f 93       	tst	r15		
     904c:	fc 23       	jnz	$-6      	;abs 0x9046
-	/* wakeup is complete, drive CSn high and continue */
-	CC2500_SPI_DISABLE();
     904e:	b0 12 74 97 	call	#0x9774	
-
-	cc2500_idle();
     9052:	b0 12 ec 8f 	call	#0x8fec	
-	cc2500_wait_status(CC2500_STATUS_IDLE);
     9056:	4f 43       	clr.b	r15		
     9058:	b0 12 a8 88 	call	#0x88a8	
-}
     905c:	34 41       	pop	r4		
     905e:	30 41       	ret			
 
 00009060 <cc2500_variables_bootstrap>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void cc2500_variables_bootstrap(void)
-{
     9060:	04 12       	push	r4		
     9062:	04 41       	mov	r1,	r4	
     9064:	24 53       	incd	r4		
-	/* status */
-	cc2500_status_register = 0;
     9066:	c2 43 3e 02 	mov.b	#0,	&0x023e	;r3 As==00
-
-	/* Internal driver variables for tx/rx */
-	cc2500_rx_packet = 0x00;
     906a:	82 43 3c 02 	mov	#0,	&0x023c	;r3 As==00
-	cc2500_rx_offset = 0x00;
     906e:	c2 43 24 02 	mov.b	#0,	&0x0224	;r3 As==00
-	cc2500_rx_length = 0x00;
     9072:	c2 43 26 02 	mov.b	#0,	&0x0226	;r3 As==00
-}
     9076:	34 41       	pop	r4		
     9078:	30 41       	ret			
 
 0000907a <CC_ASSERT>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void CC_ASSERT(int cond)
-{
     907a:	04 12       	push	r4		
     907c:	04 41       	mov	r1,	r4	
     907e:	24 53       	incd	r4		
     9080:	21 83       	decd	r1		
     9082:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	if (!cond) {
-		//LED_BLINK_ME();
-	}
-}
     9086:	21 53       	incd	r1		
     9088:	34 41       	pop	r4		
     908a:	30 41       	ret			
 
 0000908c <cc2500_init>:
-
-void cc2500_init(void)
-{
     908c:	04 12       	push	r4		
     908e:	04 41       	mov	r1,	r4	
     9090:	24 53       	incd	r4		
     9092:	21 83       	decd	r1		
-	/* ------------------------------
-	 * Init
-	 * ------------------------------ */
-
-	cc2500_variables_bootstrap();	/* bootstrap global cc2500 variables */
     9094:	b0 12 60 90 	call	#0x9060	
-
-	DBG_PRINTF("init enter\n");
-
-	CC2500_HW_INIT();
     9098:	b0 12 40 86 	call	#0x8640	
-
-	DBG_PRINTF("  hw_init ok\n");
-
-	/* initialize GPIO pins */
-	CONFIG_GDO0_PIN_AS_INPUT();
     909c:	b0 12 2a 86 	call	#0x862a	
-	/* CC_ASSERT(spi_check_miso_high()); */
-
-	DBG_PRINTF("  miso ok\n");
-
-	/* pulse CSn low then high */
-	spi_select_radio();
     90a0:	b0 12 5e 97 	call	#0x975e	
-	delay_usec(10);
     90a4:	3f 40 0a 00 	mov	#10,	r15	;#0x000a
     90a8:	b0 12 fc 93 	call	#0x93fc	
-	spi_deselect_radio();
     90ac:	b0 12 74 97 	call	#0x9774	
-	/* hold CSn high for at least 40 microseconds */
-	delay_usec(40);
     90b0:	3f 40 28 00 	mov	#40,	r15	;#0x0028
     90b4:	b0 12 fc 93 	call	#0x93fc	
-	/* pull CSn low and wait for SO to go low */
-
-	DBG_PRINTF("  reset 1 ok\n");
-
-	spi_select_radio();
     90b8:	b0 12 5e 97 	call	#0x975e	
-	while (spi_check_miso_high()) ;
     90bc:	03 43       	nop			
     90be:	b0 12 b4 96 	call	#0x96b4	
     90c2:	0f 93       	tst	r15		
     90c4:	fc 23       	jnz	$-6      	;abs 0x90be
-
-	/* directly send strobe command - cannot use function as it affects CSn pin */
-	spi_tx_rx(CC2500_STROBE_SRES);
     90c6:	3f 40 30 00 	mov	#48,	r15	;#0x0030
     90ca:	b0 12 7a 96 	call	#0x967a	
-
-	/* wait for SO to go low again, reset is complete at that point */
-	while (spi_check_miso_high()) ;
     90ce:	03 43       	nop			
     90d0:	b0 12 b4 96 	call	#0x96b4	
     90d4:	0f 93       	tst	r15		
     90d6:	fc 23       	jnz	$-6      	;abs 0x90d0
-
-	/* return CSn pin to its default high level */
-	spi_deselect_radio();
     90d8:	b0 12 74 97 	call	#0x9774	
-	 * ------------------------------ */
-
-	/* verify that SPI is working, PKTLEN is an arbitrary read/write register used for testing */
-#define TEST_VALUE 0xA5
-	unsigned short v;
-	CC2500_SPI_WREG(CC2500_REG_PKTLEN, TEST_VALUE);
     90dc:	3e 40 a5 00 	mov	#165,	r14	;#0x00a5
     90e0:	3f 40 06 00 	mov	#6,	r15	;#0x0006
     90e4:	b0 12 d4 86 	call	#0x86d4	
-	v = CC2500_SPI_RREG(CC2500_REG_PKTLEN);
     90e8:	3f 40 06 00 	mov	#6,	r15	;#0x0006
     90ec:	b0 12 02 87 	call	#0x8702	
     90f0:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
     90f4:	94 11 fc ff 	sxt	-4(r4)		;0xfffc(r4)
-	CC_ASSERT((v & 0xff) == TEST_VALUE);	/* SPI is not responding */
     90f8:	1e 44 fc ff 	mov	-4(r4),	r14	;0xfffc(r4)
     90fc:	3e f0 ff 00 	and	#255,	r14	;#0x00ff
     9100:	1f 43       	mov	#1,	r15	;r3 As==01
@@ -2777,17 +2100,10 @@ void cc2500_init(void)
     9106:	01 24       	jz	$+4      	;abs 0x910a
     9108:	0f 43       	clr	r15		
     910a:	b0 12 7a 90 	call	#0x907a	
-
-	/* verify the correct radio is installed */
-#define RADIO_PARTNUM          0x80
-#define RADIO_MIN_VERSION      3
-#define SETTING_PATABLE0       0xFE
-	v = CC2500_SPI_ROREG(CC2500_REG_PARTNUM);
     910e:	3f 40 30 00 	mov	#48,	r15	;#0x0030
     9112:	b0 12 38 87 	call	#0x8738	
     9116:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
     911a:	94 11 fc ff 	sxt	-4(r4)		;0xfffc(r4)
-	CC_ASSERT((v & 0xff) == RADIO_PARTNUM);	/* incorrect radio specified */
     911e:	1e 44 fc ff 	mov	-4(r4),	r14	;0xfffc(r4)
     9122:	3e f0 ff 00 	and	#255,	r14	;#0x00ff
     9126:	1f 43       	mov	#1,	r15	;r3 As==01
@@ -2795,14 +2111,10 @@ void cc2500_init(void)
     912c:	01 24       	jz	$+4      	;abs 0x9130
     912e:	0f 43       	clr	r15		
     9130:	b0 12 7a 90 	call	#0x907a	
-	DBG_PRINTF("  t3 ok\n");
-
-	v = CC2500_SPI_ROREG(CC2500_REG_VERSION);
     9134:	3f 40 31 00 	mov	#49,	r15	;#0x0031
     9138:	b0 12 38 87 	call	#0x8738	
     913c:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
     9140:	94 11 fc ff 	sxt	-4(r4)		;0xfffc(r4)
-	CC_ASSERT((v & 0xff) >= RADIO_MIN_VERSION);	/* obsolete radio specified  */
     9144:	1e 44 fc ff 	mov	-4(r4),	r14	;0xfffc(r4)
     9148:	3e f0 ff 00 	and	#255,	r14	;#0x00ff
     914c:	1f 43       	mov	#1,	r15	;r3 As==01
@@ -2810,59 +2122,29 @@ void cc2500_init(void)
     9152:	01 2c       	jc	$+4      	;abs 0x9156
     9154:	0f 43       	clr	r15		
     9156:	b0 12 7a 90 	call	#0x907a	
-
-	/* ------------------------------
-	 * Configuration
-	 * ------------------------------ */
-
-	cc2500_configure(&rfSettings_default_config);
-    915a:	3f 40 70 a5 	mov	#-23184,r15	;#0xa570
+    915a:	3f 40 74 a5 	mov	#-23180,r15	;#0xa574
     915e:	b0 12 34 8a 	call	#0x8a34	
-
-	DBG_PRINTF("init done\n");
-}
     9162:	21 53       	incd	r1		
     9164:	34 41       	pop	r4		
     9166:	30 41       	ret			
 
 00009168 <cc2500_gdox_signal_handler>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void cc2500_gdox_signal_handler(uint8_t mask)
-{
     9168:	04 12       	push	r4		
     916a:	04 41       	mov	r1,	r4	
     916c:	24 53       	incd	r4		
     916e:	21 83       	decd	r1		
     9170:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
-	if (mask & CC2500_GDO0) {
     9174:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     9178:	1f f3       	and	#1,	r15	;r3 As==01
     917a:	4f 4f       	mov.b	r15,	r15	
     917c:	4f 93       	tst.b	r15		
     917e:	02 24       	jz	$+6      	;abs 0x9184
-		/* rx fifo above threshold */
-		cc2500_rx_pkt_eop();
     9180:	b0 12 30 8e 	call	#0x8e30	
-	}
-
-	if (mask & CC2500_GDO2) {
-		/* SYNC_WORD */
-	}
-}
     9184:	21 53       	incd	r1		
     9186:	34 41       	pop	r4		
     9188:	30 41       	ret			
 
 0000918a <port2_irq_handler>:
-/* **************************************************
- * Interupts handler
- * **************************************************/
-
-ISR(PORT2, port2_irq_handler)
-{
     918a:	0f 12       	push	r15		
     918c:	0e 12       	push	r14		
     918e:	0d 12       	push	r13		
@@ -2871,14 +2153,8 @@ ISR(PORT2, port2_irq_handler)
     9194:	04 41       	mov	r1,	r4	
     9196:	34 50 0a 00 	add	#10,	r4	;#0x000a
     919a:	21 83       	decd	r1		
-	uint8_t cc_cmd = 0;
     919c:	c4 43 f4 ff 	mov.b	#0,	-12(r4)	;r3 As==00, 0xfff4(r4)
-	uint8_t cc_alive = 0;
     91a0:	c4 43 f5 ff 	mov.b	#0,	-11(r4)	;r3 As==00, 0xfff5(r4)
-
-	DBG_PRINTF("port2 irq\n");
-
-	if (P2IFG & (P2IE & GDO0_MASK)) {
     91a4:	5f 42 2b 00 	mov.b	&0x002b,r15	
     91a8:	4f 4f       	mov.b	r15,	r15	
     91aa:	5e 42 2d 00 	mov.b	&0x002d,r14	
@@ -2887,18 +2163,11 @@ ISR(PORT2, port2_irq_handler)
     91b4:	0f fe       	and	r14,	r15	
     91b6:	0f 93       	tst	r15		
     91b8:	0a 24       	jz	$+22     	;abs 0x91ce
-		DBG_PRINTF("IRQ GDO0\n");
-		cc_cmd |= CC2500_GDO0;
     91ba:	d4 d3 f4 ff 	bis.b	#1,	-12(r4)	;r3 As==01, 0xfff4(r4)
-		cc_alive |= 1;
     91be:	d4 d3 f5 ff 	bis.b	#1,	-11(r4)	;r3 As==01, 0xfff5(r4)
-		P2IFG &= GDO0_MASK;
     91c2:	5f 42 2b 00 	mov.b	&0x002b,r15	
     91c6:	7f f0 40 00 	and.b	#64,	r15	;#0x0040
     91ca:	c2 4f 2b 00 	mov.b	r15,	&0x002b	
-	}
-
-	if (P2IFG & (P2IE & GDO2_MASK)) {
     91ce:	5f 42 2b 00 	mov.b	&0x002b,r15	
     91d2:	4f 4f       	mov.b	r15,	r15	
     91d4:	5e 42 2d 00 	mov.b	&0x002d,r14	
@@ -2907,36 +2176,20 @@ ISR(PORT2, port2_irq_handler)
     91de:	0f fe       	and	r14,	r15	
     91e0:	0f 93       	tst	r15		
     91e2:	0a 24       	jz	$+22     	;abs 0x91f8
-		DBG_PRINTF("IRQ GDO2\n");
-		cc_cmd |= CC2500_GDO2;
     91e4:	e4 d3 f4 ff 	bis.b	#2,	-12(r4)	;r3 As==10, 0xfff4(r4)
-		cc_alive |= 1;
     91e8:	d4 d3 f5 ff 	bis.b	#1,	-11(r4)	;r3 As==01, 0xfff5(r4)
-		P2IFG &= GDO2_MASK;
     91ec:	5f 42 2b 00 	mov.b	&0x002b,r15	
     91f0:	7f f0 80 ff 	and.b	#-128,	r15	;#0xff80
     91f4:	c2 4f 2b 00 	mov.b	r15,	&0x002b	
-	}
-
-	if (cc_cmd != 0) {
     91f8:	c4 93 f4 ff 	tst.b	-12(r4)	;0xfff4(r4)
     91fc:	04 24       	jz	$+10     	;abs 0x9206
-		cc2500_gdox_signal_handler(cc_cmd);
     91fe:	5f 44 f4 ff 	mov.b	-12(r4),r15	;0xfff4(r4)
     9202:	b0 12 68 91 	call	#0x9168	
-	}
-
-	if (cc_alive) {
     9206:	c4 93 f5 ff 	tst.b	-11(r4)	;0xfff5(r4)
     920a:	03 24       	jz	$+8      	;abs 0x9212
-		LPM_OFF_ON_EXIT;
     920c:	b4 c0 f0 00 	bic	#240,	0(r4)	;#0x00f0, 0x0000(r4)
     9210:	00 00 
-	}
-
-	P2IFG = 0;
     9212:	c2 43 2b 00 	mov.b	#0,	&0x002b	;r3 As==00
-}
     9216:	21 53       	incd	r1		
     9218:	34 41       	pop	r4		
     921a:	3c 41       	pop	r12		
@@ -2946,32 +2199,20 @@ ISR(PORT2, port2_irq_handler)
     9222:	00 13       	reti			
 
 00009224 <get_mclk_freq_mhz>:
- ***************************************************************/
-
-#define WAIT_CRISTAL() do { } while (0)
-
-int get_mclk_freq_mhz()
-{
     9224:	04 12       	push	r4		
     9226:	04 41       	mov	r1,	r4	
     9228:	24 53       	incd	r4		
-	return mclk_freq_mhz;
     922a:	1f 42 28 02 	mov	&0x0228,r15	
-}
     922e:	34 41       	pop	r4		
     9230:	30 41       	ret			
 
 00009232 <set_mcu_speed>:
-
-static void set_mcu_speed(unsigned char dco_mhz, unsigned char smclk_divider)
-{
     9232:	04 12       	push	r4		
     9234:	04 41       	mov	r1,	r4	
     9236:	24 53       	incd	r4		
     9238:	21 83       	decd	r1		
     923a:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
     923e:	c4 4e fd ff 	mov.b	r14,	-3(r4)	;0xfffd(r4)
-	switch (dco_mhz) {
     9242:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     9246:	3f 92       	cmp	#8,	r15	;r2 As==11
     9248:	16 24       	jz	$+46     	;abs 0x9276
@@ -2985,44 +2226,26 @@ static void set_mcu_speed(unsigned char dco_mhz, unsigned char smclk_divider)
     925c:	3f 90 10 00 	cmp	#16,	r15	;#0x0010
     9260:	1c 24       	jz	$+58     	;abs 0x929a
     9262:	24 3c       	jmp	$+74     	;abs 0x92ac
-	case 1:
-		BCSCTL1 = CALBC1_1MHZ;
     9264:	5f 42 ff 10 	mov.b	&0x10ff,r15	
     9268:	c2 4f 57 00 	mov.b	r15,	&0x0057	
-		DCOCTL = CALDCO_1MHZ;
     926c:	5f 42 fe 10 	mov.b	&0x10fe,r15	
     9270:	c2 4f 56 00 	mov.b	r15,	&0x0056	
-		break;
     9274:	1b 3c       	jmp	$+56     	;abs 0x92ac
-	case 8:
-		BCSCTL1 = CALBC1_8MHZ;
     9276:	5f 42 fd 10 	mov.b	&0x10fd,r15	
     927a:	c2 4f 57 00 	mov.b	r15,	&0x0057	
-		DCOCTL = CALDCO_8MHZ;
     927e:	5f 42 fc 10 	mov.b	&0x10fc,r15	
     9282:	c2 4f 56 00 	mov.b	r15,	&0x0056	
-		break;
     9286:	12 3c       	jmp	$+38     	;abs 0x92ac
-	case 12:
-		BCSCTL1 = CALBC1_12MHZ;
     9288:	5f 42 fb 10 	mov.b	&0x10fb,r15	
     928c:	c2 4f 57 00 	mov.b	r15,	&0x0057	
-		DCOCTL = CALDCO_12MHZ;
     9290:	5f 42 fa 10 	mov.b	&0x10fa,r15	
     9294:	c2 4f 56 00 	mov.b	r15,	&0x0056	
-		break;
     9298:	09 3c       	jmp	$+20     	;abs 0x92ac
-	case 16:
-		BCSCTL1 = CALBC1_16MHZ;
     929a:	5f 42 f9 10 	mov.b	&0x10f9,r15	
     929e:	c2 4f 57 00 	mov.b	r15,	&0x0057	
-		DCOCTL = CALDCO_16MHZ;
     92a2:	5f 42 f8 10 	mov.b	&0x10f8,r15	
     92a6:	c2 4f 56 00 	mov.b	r15,	&0x0056	
-		break;
     92aa:	03 43       	nop			
-	}
-	switch (smclk_divider) {
     92ac:	5f 44 fd ff 	mov.b	-3(r4),	r15	;0xfffd(r4)
     92b0:	2f 93       	cmp	#2,	r15	;r3 As==10
     92b2:	0e 24       	jz	$+30     	;abs 0x92d0
@@ -3036,273 +2259,167 @@ static void set_mcu_speed(unsigned char dco_mhz, unsigned char smclk_divider)
     92c4:	3f 92       	cmp	#8,	r15	;r2 As==11
     92c6:	0a 24       	jz	$+22     	;abs 0x92dc
     92c8:	0d 3c       	jmp	$+28     	;abs 0x92e4
-	case 1:
-		/* SELM_0: MCL Source Select 0: DCOCLK */
-		/* DIVS_1: SMCLK divider /1 */
-		BCSCTL2 = SELM_0 | DIVS_0;
     92ca:	c2 43 58 00 	mov.b	#0,	&0x0058	;r3 As==00
-		break;
     92ce:	0a 3c       	jmp	$+22     	;abs 0x92e4
-	case 2:
-		/* DIVS_1: SMCLK divider /2 */
-		BCSCTL2 = SELM_0 | DIVS_1;
     92d0:	e2 43 58 00 	mov.b	#2,	&0x0058	;r3 As==10
-		break;
     92d4:	07 3c       	jmp	$+16     	;abs 0x92e4
-	case 4:
-		/* DIVS_2: SMCLK divider /4 */
-		BCSCTL2 = SELM_0 | DIVS_2;
     92d6:	e2 42 58 00 	mov.b	#4,	&0x0058	;r2 As==10
-		break;
     92da:	04 3c       	jmp	$+10     	;abs 0x92e4
-	case 8:
-		/* DIVS_3: SMCLK divider /8 */
-		BCSCTL2 = SELM_0 | DIVS_3;
     92dc:	f2 40 06 00 	mov.b	#6,	&0x0058	;#0x0006
     92e0:	58 00 
-		break;
     92e2:	03 43       	nop			
-	}
-
-	WAIT_CRISTAL();
-
-	mclk_freq_mhz = dco_mhz;
     92e4:	5f 44 fc ff 	mov.b	-4(r4),	r15	;0xfffc(r4)
     92e8:	82 4f 28 02 	mov	r15,	&0x0228	
-}
     92ec:	21 53       	incd	r1		
     92ee:	34 41       	pop	r4		
     92f0:	30 41       	ret			
 
 000092f2 <set_mcu_speed_dco_mclk_1MHz_smclk_1MHz>:
-
-void set_mcu_speed_dco_mclk_1MHz_smclk_1MHz()
-{
     92f2:	04 12       	push	r4		
     92f4:	04 41       	mov	r1,	r4	
     92f6:	24 53       	incd	r4		
-	set_mcu_speed(1, 1);
     92f8:	5e 43       	mov.b	#1,	r14	;r3 As==01
     92fa:	5f 43       	mov.b	#1,	r15	;r3 As==01
     92fc:	b0 12 32 92 	call	#0x9232	
-}
     9300:	34 41       	pop	r4		
     9302:	30 41       	ret			
 
 00009304 <set_mcu_speed_dco_mclk_8MHz_smclk_8MHz>:
-
-void set_mcu_speed_dco_mclk_8MHz_smclk_8MHz()
-{
     9304:	04 12       	push	r4		
     9306:	04 41       	mov	r1,	r4	
     9308:	24 53       	incd	r4		
-	set_mcu_speed(8, 1);
     930a:	5e 43       	mov.b	#1,	r14	;r3 As==01
     930c:	7f 42       	mov.b	#8,	r15	;r2 As==11
     930e:	b0 12 32 92 	call	#0x9232	
-}
     9312:	34 41       	pop	r4		
     9314:	30 41       	ret			
 
 00009316 <set_mcu_speed_dco_mclk_8MHz_smclk_4MHz>:
-
-void set_mcu_speed_dco_mclk_8MHz_smclk_4MHz()
-{
     9316:	04 12       	push	r4		
     9318:	04 41       	mov	r1,	r4	
     931a:	24 53       	incd	r4		
-	set_mcu_speed(8, 2);
     931c:	6e 43       	mov.b	#2,	r14	;r3 As==10
     931e:	7f 42       	mov.b	#8,	r15	;r2 As==11
     9320:	b0 12 32 92 	call	#0x9232	
-}
     9324:	34 41       	pop	r4		
     9326:	30 41       	ret			
 
 00009328 <set_mcu_speed_dco_mclk_8MHz_smclk_2MHz>:
-
-void set_mcu_speed_dco_mclk_8MHz_smclk_2MHz()
-{
     9328:	04 12       	push	r4		
     932a:	04 41       	mov	r1,	r4	
     932c:	24 53       	incd	r4		
-	set_mcu_speed(8, 4);
     932e:	6e 42       	mov.b	#4,	r14	;r2 As==10
     9330:	7f 42       	mov.b	#8,	r15	;r2 As==11
     9332:	b0 12 32 92 	call	#0x9232	
-}
     9336:	34 41       	pop	r4		
     9338:	30 41       	ret			
 
 0000933a <set_mcu_speed_dco_mclk_8MHz_smclk_1MHz>:
-
-void set_mcu_speed_dco_mclk_8MHz_smclk_1MHz()
-{
     933a:	04 12       	push	r4		
     933c:	04 41       	mov	r1,	r4	
     933e:	24 53       	incd	r4		
-	set_mcu_speed(8, 8);
     9340:	7e 42       	mov.b	#8,	r14	;r2 As==11
     9342:	7f 42       	mov.b	#8,	r15	;r2 As==11
     9344:	b0 12 32 92 	call	#0x9232	
-}
     9348:	34 41       	pop	r4		
     934a:	30 41       	ret			
 
 0000934c <set_mcu_speed_dco_mclk_12MHz_smclk_12MHz>:
-
-void set_mcu_speed_dco_mclk_12MHz_smclk_12MHz()
-{
     934c:	04 12       	push	r4		
     934e:	04 41       	mov	r1,	r4	
     9350:	24 53       	incd	r4		
-	set_mcu_speed(12, 1);
     9352:	5e 43       	mov.b	#1,	r14	;r3 As==01
     9354:	7f 40 0c 00 	mov.b	#12,	r15	;#0x000c
     9358:	b0 12 32 92 	call	#0x9232	
-}
     935c:	34 41       	pop	r4		
     935e:	30 41       	ret			
 
 00009360 <set_mcu_speed_dco_mclk_12MHz_smclk_6MHz>:
-
-void set_mcu_speed_dco_mclk_12MHz_smclk_6MHz()
-{
     9360:	04 12       	push	r4		
     9362:	04 41       	mov	r1,	r4	
     9364:	24 53       	incd	r4		
-	set_mcu_speed(12, 2);
     9366:	6e 43       	mov.b	#2,	r14	;r3 As==10
     9368:	7f 40 0c 00 	mov.b	#12,	r15	;#0x000c
     936c:	b0 12 32 92 	call	#0x9232	
-}
     9370:	34 41       	pop	r4		
     9372:	30 41       	ret			
 
 00009374 <set_mcu_speed_dco_mclk_12MHz_smclk_3MHz>:
-
-void set_mcu_speed_dco_mclk_12MHz_smclk_3MHz()
-{
     9374:	04 12       	push	r4		
     9376:	04 41       	mov	r1,	r4	
     9378:	24 53       	incd	r4		
-	set_mcu_speed(12, 4);
     937a:	6e 42       	mov.b	#4,	r14	;r2 As==10
     937c:	7f 40 0c 00 	mov.b	#12,	r15	;#0x000c
     9380:	b0 12 32 92 	call	#0x9232	
-}
     9384:	34 41       	pop	r4		
     9386:	30 41       	ret			
 
 00009388 <set_mcu_speed_dco_mclk_12MHz_smclk_1_5MHz>:
-
-void set_mcu_speed_dco_mclk_12MHz_smclk_1_5MHz()
-{
     9388:	04 12       	push	r4		
     938a:	04 41       	mov	r1,	r4	
     938c:	24 53       	incd	r4		
-	set_mcu_speed(12, 8);
     938e:	7e 42       	mov.b	#8,	r14	;r2 As==11
     9390:	7f 40 0c 00 	mov.b	#12,	r15	;#0x000c
     9394:	b0 12 32 92 	call	#0x9232	
-}
     9398:	34 41       	pop	r4		
     939a:	30 41       	ret			
 
 0000939c <set_mcu_speed_dco_mclk_16MHz_smclk_16MHz>:
-
-void set_mcu_speed_dco_mclk_16MHz_smclk_16MHz()
-{
     939c:	04 12       	push	r4		
     939e:	04 41       	mov	r1,	r4	
     93a0:	24 53       	incd	r4		
-	set_mcu_speed(16, 1);
     93a2:	5e 43       	mov.b	#1,	r14	;r3 As==01
     93a4:	7f 40 10 00 	mov.b	#16,	r15	;#0x0010
     93a8:	b0 12 32 92 	call	#0x9232	
-}
     93ac:	34 41       	pop	r4		
     93ae:	30 41       	ret			
 
 000093b0 <set_mcu_speed_dco_mclk_16MHz_smclk_8MHz>:
-
-void set_mcu_speed_dco_mclk_16MHz_smclk_8MHz()
-{
     93b0:	04 12       	push	r4		
     93b2:	04 41       	mov	r1,	r4	
     93b4:	24 53       	incd	r4		
-	set_mcu_speed(16, 2);
     93b6:	6e 43       	mov.b	#2,	r14	;r3 As==10
     93b8:	7f 40 10 00 	mov.b	#16,	r15	;#0x0010
     93bc:	b0 12 32 92 	call	#0x9232	
-}
     93c0:	34 41       	pop	r4		
     93c2:	30 41       	ret			
 
 000093c4 <set_mcu_speed_dco_mclk_16MHz_smclk_4MHz>:
-
-void set_mcu_speed_dco_mclk_16MHz_smclk_4MHz()
-{
     93c4:	04 12       	push	r4		
     93c6:	04 41       	mov	r1,	r4	
     93c8:	24 53       	incd	r4		
-	set_mcu_speed(16, 4);
     93ca:	6e 42       	mov.b	#4,	r14	;r2 As==10
     93cc:	7f 40 10 00 	mov.b	#16,	r15	;#0x0010
     93d0:	b0 12 32 92 	call	#0x9232	
-}
     93d4:	34 41       	pop	r4		
     93d6:	30 41       	ret			
 
 000093d8 <set_mcu_speed_dco_mclk_16MHz_smclk_2MHz>:
-
-void set_mcu_speed_dco_mclk_16MHz_smclk_2MHz()
-{
     93d8:	04 12       	push	r4		
     93da:	04 41       	mov	r1,	r4	
     93dc:	24 53       	incd	r4		
-	set_mcu_speed(16, 8);
     93de:	7e 42       	mov.b	#8,	r14	;r2 As==11
     93e0:	7f 40 10 00 	mov.b	#16,	r15	;#0x0010
     93e4:	b0 12 32 92 	call	#0x9232	
-}
     93e8:	34 41       	pop	r4		
     93ea:	30 41       	ret			
 
 000093ec <loop_4_cycles>:
-/* the IAR version of loop_4_cycles is defined in loop_4_cycles.s43 */
-#if defined(__GNUC__) && defined(__MSP430__)
-/* uint32_t version */
-/* will block 4*n cycles + constant (function jump and init) */
-void loop_4_cycles(register uint32_t n)
-{
     93ec:	04 12       	push	r4		
     93ee:	04 41       	mov	r1,	r4	
     93f0:	24 53       	incd	r4		
-	/* C equivalent: do{ n--; } while(n > 0) */
-	__asm__ __volatile__("0: \n" "add.w #-1,%A[n] \n"	/* LSB, 1 cycles */
     93f2:	3e 53       	add	#-1,	r14	;r3 As==11
     93f4:	3f 63       	addc	#-1,	r15	;r3 As==11
     93f6:	fd 2f       	jc	$-4      	;abs 0x93f2
-			     "addc.w #-1,%B[n] \n"	/* MSB, 1 cycles */
-			     "jc 0b \n"	/* 2 cycles      */
-			     :[n] "+r"((long)n));
-}
     93f8:	34 41       	pop	r4		
     93fa:	30 41       	ret			
 
 000093fc <delay_usec>:
-#endif
-
-void inline delay_usec(unsigned int usec)
-{
     93fc:	04 12       	push	r4		
     93fe:	04 41       	mov	r1,	r4	
     9400:	24 53       	incd	r4		
     9402:	31 50 fa ff 	add	#-6,	r1	;#0xfffa
     9406:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	uint32_t loops;
-	switch (mclk_freq_mhz) {
     940a:	1f 42 28 02 	mov	&0x0228,r15	
     940e:	3f 92       	cmp	#8,	r15	;r2 As==11
     9410:	18 24       	jz	$+50     	;abs 0x9442
@@ -3316,8 +2433,6 @@ void inline delay_usec(unsigned int usec)
     9424:	3f 90 10 00 	cmp	#16,	r15	;#0x0010
     9428:	1e 24       	jz	$+62     	;abs 0x9466
     942a:	26 3c       	jmp	$+78     	;abs 0x9478
-	case 1:		// 4 cycles == 4 us
-		loops = usec >> 2;
     942c:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     9430:	12 c3       	clrc			
     9432:	0f 10       	rrc	r15		
@@ -3325,37 +2440,25 @@ void inline delay_usec(unsigned int usec)
     9436:	0f 10       	rrc	r15		
     9438:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
     943c:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     9440:	26 3c       	jmp	$+78     	;abs 0x948e
-	case 8:		// 4 cycles == 0.5 us
-		loops = usec << 1;
     9442:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     9446:	0f 5f       	rla	r15		
     9448:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
     944c:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     9450:	1e 3c       	jmp	$+62     	;abs 0x948e
-	case 12:		// 4 cycles == 0.33 us
-		loops = usec * 3;
     9452:	1e 44 fc ff 	mov	-4(r4),	r14	;0xfffc(r4)
     9456:	0f 4e       	mov	r14,	r15	
     9458:	0f 5f       	rla	r15		
     945a:	0f 5e       	add	r14,	r15	
     945c:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
     9460:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     9464:	14 3c       	jmp	$+42     	;abs 0x948e
-	case 16:		// 4 cycles == 0.25 us
-		loops = usec << 2;
     9466:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     946a:	0f 5f       	rla	r15		
     946c:	0f 5f       	rla	r15		
     946e:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
     9472:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     9476:	0b 3c       	jmp	$+24     	;abs 0x948e
-	default:
-		loops = usec >> 2; /* arbitrary 1MHz */
     9478:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     947c:	12 c3       	clrc			
     947e:	0f 10       	rrc	r15		
@@ -3363,31 +2466,20 @@ void inline delay_usec(unsigned int usec)
     9482:	0f 10       	rrc	r15		
     9484:	84 4f f8 ff 	mov	r15,	-8(r4)	;0xfff8(r4)
     9488:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     948c:	03 43       	nop			
-	}
-	loop_4_cycles(loops);
     948e:	1e 44 f8 ff 	mov	-8(r4),	r14	;0xfff8(r4)
     9492:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     9496:	b0 12 ec 93 	call	#0x93ec	
-}
     949a:	31 50 06 00 	add	#6,	r1	;#0x0006
     949e:	34 41       	pop	r4		
     94a0:	30 41       	ret			
 
 000094a2 <delay_ms>:
-
-void delay_ms(unsigned int ms)
-{
     94a2:	04 12       	push	r4		
     94a4:	04 41       	mov	r1,	r4	
     94a6:	24 53       	incd	r4		
     94a8:	31 82       	sub	#8,	r1	;r2 As==11
     94aa:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	unsigned int i;
-	uint32_t loops;
-
-	switch (mclk_freq_mhz) {
     94ae:	1f 42 28 02 	mov	&0x0228,r15	
     94b2:	3f 92       	cmp	#8,	r15	;r2 As==11
     94b4:	13 24       	jz	$+40     	;abs 0x94dc
@@ -3401,251 +2493,152 @@ void delay_ms(unsigned int ms)
     94c8:	3f 90 10 00 	cmp	#16,	r15	;#0x0010
     94cc:	13 24       	jz	$+40     	;abs 0x94f4
     94ce:	18 3c       	jmp	$+50     	;abs 0x9500
-	case 1:
-		loops = 1000 >> 2;
     94d0:	b4 40 fa 00 	mov	#250,	-8(r4)	;#0x00fa, 0xfff8(r4)
     94d4:	f8 ff 
     94d6:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     94da:	18 3c       	jmp	$+50     	;abs 0x950c
-	case 8:
-		loops = 1000 << 1;
     94dc:	b4 40 d0 07 	mov	#2000,	-8(r4)	;#0x07d0, 0xfff8(r4)
     94e0:	f8 ff 
     94e2:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     94e6:	12 3c       	jmp	$+38     	;abs 0x950c
-	case 12:
-		loops = 1000 * 3;
     94e8:	b4 40 b8 0b 	mov	#3000,	-8(r4)	;#0x0bb8, 0xfff8(r4)
     94ec:	f8 ff 
     94ee:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     94f2:	0c 3c       	jmp	$+26     	;abs 0x950c
-	case 16:
-		loops = 1000 << 2;
     94f4:	b4 40 a0 0f 	mov	#4000,	-8(r4)	;#0x0fa0, 0xfff8(r4)
     94f8:	f8 ff 
     94fa:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     94fe:	06 3c       	jmp	$+14     	;abs 0x950c
-	default: /* arbitrary value to 1MHZ */
-		loops = 1000 >> 2;
     9500:	b4 40 fa 00 	mov	#250,	-8(r4)	;#0x00fa, 0xfff8(r4)
     9504:	f8 ff 
     9506:	84 43 fa ff 	mov	#0,	-6(r4)	;r3 As==00, 0xfffa(r4)
-		break;
     950a:	03 43       	nop			
-	}
-
-	/* calling delay_usec() introduces an high
-	 * clock skew for low mclk frequencies
-	 */
-	for (i = 0; i < ms; i++) {
     950c:	84 43 f6 ff 	mov	#0,	-10(r4)	;r3 As==00, 0xfff6(r4)
     9510:	08 3c       	jmp	$+18     	;abs 0x9522
-		loop_4_cycles(loops);
     9512:	1e 44 f8 ff 	mov	-8(r4),	r14	;0xfff8(r4)
     9516:	1f 44 fa ff 	mov	-6(r4),	r15	;0xfffa(r4)
     951a:	b0 12 ec 93 	call	#0x93ec	
-	}
-
-	/* calling delay_usec() introduces an high
-	 * clock skew for low mclk frequencies
-	 */
-	for (i = 0; i < ms; i++) {
     951e:	94 53 f6 ff 	inc	-10(r4)	;0xfff6(r4)
     9522:	94 94 fc ff 	cmp	-4(r4),	-10(r4)	;0xfffc(r4), 0xfff6(r4)
     9526:	f6 ff 
     9528:	f4 2b       	jnc	$-22     	;abs 0x9512
-		loop_4_cycles(loops);
-	}
-}
     952a:	31 52       	add	#8,	r1	;r2 As==11
     952c:	34 41       	pop	r4		
     952e:	30 41       	ret			
 
 00009530 <led_green_off>:
-#define LED_PORT       P1OUT
-#define BIT_GREEN      BIT1
-#define BIT_RED        BIT0
-
-void led_green_off(void)
-{
     9530:	04 12       	push	r4		
     9532:	04 41       	mov	r1,	r4	
     9534:	24 53       	incd	r4		
-	LED_PORT &= ~BIT_GREEN;
     9536:	5f 42 21 00 	mov.b	&0x0021,r15	
     953a:	7f f0 fd ff 	and.b	#-3,	r15	;#0xfffd
     953e:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     9542:	34 41       	pop	r4		
     9544:	30 41       	ret			
 
 00009546 <led_green_on>:
-
-void led_green_on(void)
-{
     9546:	04 12       	push	r4		
     9548:	04 41       	mov	r1,	r4	
     954a:	24 53       	incd	r4		
-	LED_PORT |= BIT_GREEN;
     954c:	5f 42 21 00 	mov.b	&0x0021,r15	
     9550:	6f d3       	bis.b	#2,	r15	;r3 As==10
     9552:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     9556:	34 41       	pop	r4		
     9558:	30 41       	ret			
 
 0000955a <led_green_switch>:
-
-void led_green_switch(void)
-{
     955a:	04 12       	push	r4		
     955c:	04 41       	mov	r1,	r4	
     955e:	24 53       	incd	r4		
-	LED_PORT ^= BIT_GREEN;
     9560:	5f 42 21 00 	mov.b	&0x0021,r15	
     9564:	6f e3       	xor.b	#2,	r15	;r3 As==10
     9566:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     956a:	34 41       	pop	r4		
     956c:	30 41       	ret			
 
 0000956e <led_red_off>:
-
-void led_red_off(void)
-{
     956e:	04 12       	push	r4		
     9570:	04 41       	mov	r1,	r4	
     9572:	24 53       	incd	r4		
-	LED_PORT &= ~BIT_RED;
     9574:	5f 42 21 00 	mov.b	&0x0021,r15	
     9578:	7f f0 fe ff 	and.b	#-2,	r15	;#0xfffe
     957c:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     9580:	34 41       	pop	r4		
     9582:	30 41       	ret			
 
 00009584 <led_red_on>:
-
-void led_red_on(void)
-{
     9584:	04 12       	push	r4		
     9586:	04 41       	mov	r1,	r4	
     9588:	24 53       	incd	r4		
-	LED_PORT |= BIT_RED;
     958a:	5f 42 21 00 	mov.b	&0x0021,r15	
     958e:	5f d3       	bis.b	#1,	r15	;r3 As==01
     9590:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     9594:	34 41       	pop	r4		
     9596:	30 41       	ret			
 
 00009598 <led_red_switch>:
-
-void led_red_switch(void)
-{
     9598:	04 12       	push	r4		
     959a:	04 41       	mov	r1,	r4	
     959c:	24 53       	incd	r4		
-	LED_PORT ^= BIT_RED;
     959e:	5f 42 21 00 	mov.b	&0x0021,r15	
     95a2:	5f e3       	xor.b	#1,	r15	;r3 As==01
     95a4:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     95a8:	34 41       	pop	r4		
     95aa:	30 41       	ret			
 
 000095ac <leds_off>:
-
-void leds_off(void)
-{
     95ac:	04 12       	push	r4		
     95ae:	04 41       	mov	r1,	r4	
     95b0:	24 53       	incd	r4		
-	LED_PORT &= ~(BIT_GREEN | BIT_RED);
     95b2:	5f 42 21 00 	mov.b	&0x0021,r15	
     95b6:	7f f0 fc ff 	and.b	#-4,	r15	;#0xfffc
     95ba:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     95be:	34 41       	pop	r4		
     95c0:	30 41       	ret			
 
 000095c2 <leds_on>:
-
-void leds_on(void)
-{
     95c2:	04 12       	push	r4		
     95c4:	04 41       	mov	r1,	r4	
     95c6:	24 53       	incd	r4		
-	LED_PORT |= (BIT_GREEN | BIT_RED);
     95c8:	5f 42 21 00 	mov.b	&0x0021,r15	
     95cc:	7f d0 03 00 	bis.b	#3,	r15	;#0x0003
     95d0:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-}
     95d4:	34 41       	pop	r4		
     95d6:	30 41       	ret			
 
 000095d8 <leds_init>:
-
-void leds_init(void)
-{
     95d8:	04 12       	push	r4		
     95da:	04 41       	mov	r1,	r4	
     95dc:	24 53       	incd	r4		
-	P1OUT &= ~(BIT_GREEN | BIT_RED);
     95de:	5f 42 21 00 	mov.b	&0x0021,r15	
     95e2:	7f f0 fc ff 	and.b	#-4,	r15	;#0xfffc
     95e6:	c2 4f 21 00 	mov.b	r15,	&0x0021	
-	P1DIR |= (BIT_GREEN | BIT_RED);
     95ea:	5f 42 22 00 	mov.b	&0x0022,r15	
     95ee:	7f d0 03 00 	bis.b	#3,	r15	;#0x0003
     95f2:	c2 4f 22 00 	mov.b	r15,	&0x0022	
-	P1SEL &= ~(BIT_GREEN | BIT_RED);
     95f6:	5f 42 26 00 	mov.b	&0x0026,r15	
     95fa:	7f f0 fc ff 	and.b	#-4,	r15	;#0xfffc
     95fe:	c2 4f 26 00 	mov.b	r15,	&0x0026	
-	leds_off();
     9602:	b0 12 ac 95 	call	#0x95ac	
-}
     9606:	34 41       	pop	r4		
     9608:	30 41       	ret			
 
 0000960a <spi_init>:
-            SPI_CONFIG_PORT();				\
-            UCB0CTL1 &= ~UCSWRST;                         \
-       )
-
-void spi_init(void)
-{
     960a:	04 12       	push	r4		
     960c:	04 41       	mov	r1,	r4	
     960e:	24 53       	incd	r4		
-	/* configure all SPI related pins */
-	SPI_CONFIG_CSN_PIN_AS_OUTPUT();
     9610:	5f 42 1a 00 	mov.b	&0x001a,r15	
     9614:	5f d3       	bis.b	#1,	r15	;r3 As==01
     9616:	c2 4f 1a 00 	mov.b	r15,	&0x001a	
-	SPI_CONFIG_SCLK_PIN_AS_OUTPUT();
     961a:	5f 42 1a 00 	mov.b	&0x001a,r15	
     961e:	7f d2       	bis.b	#8,	r15	;r2 As==11
     9620:	c2 4f 1a 00 	mov.b	r15,	&0x001a	
-	SPI_CONFIG_SI_PIN_AS_OUTPUT();
     9624:	5f 42 1a 00 	mov.b	&0x001a,r15	
     9628:	6f d3       	bis.b	#2,	r15	;r3 As==10
     962a:	c2 4f 1a 00 	mov.b	r15,	&0x001a	
-	SPI_CONFIG_SO_PIN_AS_INPUT();
-
-	/* set CSn to default high level */
-	SPI_DRIVE_CSN_HIGH();
     962e:	5f 42 19 00 	mov.b	&0x0019,r15	
     9632:	5f d3       	bis.b	#1,	r15	;r3 As==01
     9634:	c2 4f 19 00 	mov.b	r15,	&0x0019	
-
-	/* initialize the SPI registers */
-	SPI_INIT();
     9638:	d2 43 69 00 	mov.b	#1,	&0x0069	;r3 As==01
     963c:	f2 40 81 ff 	mov.b	#-127,	&0x0069	;#0xff81
     9640:	69 00 
@@ -3659,209 +2652,126 @@ void spi_init(void)
     965c:	5f 42 69 00 	mov.b	&0x0069,r15	
     9660:	7f f0 fe ff 	and.b	#-2,	r15	;#0xfffe
     9664:	c2 4f 69 00 	mov.b	r15,	&0x0069	
-}
     9668:	34 41       	pop	r4		
     966a:	30 41       	ret			
 
 0000966c <spi_clear_rx_IFG>:
-
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void inline spi_clear_rx_IFG() {
     966c:	04 12       	push	r4		
     966e:	04 41       	mov	r1,	r4	
     9670:	24 53       	incd	r4		
-	__asm__ __volatile__("BIC.B #4, &0x3	/* BIC.B #UCB0RXIFG, #IFG2 */ \n");
     9672:	e2 c2 03 00 	bic.b	#4,	&0x0003	;r2 As==10
-}
     9676:	34 41       	pop	r4		
     9678:	30 41       	ret			
 
 0000967a <spi_tx_rx>:
-
-int spi_tx_rx(int data)
-{
     967a:	04 12       	push	r4		
     967c:	04 41       	mov	r1,	r4	
     967e:	24 53       	incd	r4		
     9680:	21 82       	sub	#4,	r1	;r2 As==10
     9682:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	char res;
-	spi_clear_rx_IFG();
     9686:	b0 12 6c 96 	call	#0x966c	
-	SPI_TX = data;
     968a:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     968e:	4f 4f       	mov.b	r15,	r15	
     9690:	c2 4f 6f 00 	mov.b	r15,	&0x006f	
-	SPI_WAIT_EOR();
     9694:	5f 42 03 00 	mov.b	&0x0003,r15	
     9698:	4f 4f       	mov.b	r15,	r15	
     969a:	2f f2       	and	#4,	r15	;r2 As==10
     969c:	0f 93       	tst	r15		
     969e:	fa 27       	jz	$-10     	;abs 0x9694
-	res = SPI_RX;
     96a0:	5f 42 6e 00 	mov.b	&0x006e,r15	
     96a4:	c4 4f fa ff 	mov.b	r15,	-6(r4)	;0xfffa(r4)
-	return res;
     96a8:	5f 44 fa ff 	mov.b	-6(r4),	r15	;0xfffa(r4)
     96ac:	8f 11       	sxt	r15		
-}
     96ae:	21 52       	add	#4,	r1	;r2 As==10
     96b0:	34 41       	pop	r4		
     96b2:	30 41       	ret			
 
 000096b4 <spi_check_miso_high>:
-
-
-
-int spi_check_miso_high(void)
-{
     96b4:	04 12       	push	r4		
     96b6:	04 41       	mov	r1,	r4	
     96b8:	24 53       	incd	r4		
-	return SPI_SO_IS_HIGH();
     96ba:	5f 42 18 00 	mov.b	&0x0018,r15	
     96be:	4f 4f       	mov.b	r15,	r15	
     96c0:	2f f2       	and	#4,	r15	;r2 As==10
-}
     96c2:	34 41       	pop	r4		
     96c4:	30 41       	ret			
 
 000096c6 <spi_tx_burst>:
-
-void spi_tx_burst(char *data, int len)
-{
     96c6:	04 12       	push	r4		
     96c8:	04 41       	mov	r1,	r4	
     96ca:	24 53       	incd	r4		
     96cc:	31 50 fa ff 	add	#-6,	r1	;#0xfffa
     96d0:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     96d4:	84 4e fc ff 	mov	r14,	-4(r4)	;0xfffc(r4)
-	int i;
-	for (i = 0; i < len; i++) {
     96d8:	84 43 f8 ff 	mov	#0,	-8(r4)	;r3 As==00, 0xfff8(r4)
     96dc:	11 3c       	jmp	$+36     	;abs 0x9700
-		spi_clear_rx_IFG();
     96de:	b0 12 6c 96 	call	#0x966c	
-		SPI_TX = data[i];
     96e2:	1f 44 f8 ff 	mov	-8(r4),	r15	;0xfff8(r4)
     96e6:	1f 54 fa ff 	add	-6(r4),	r15	;0xfffa(r4)
     96ea:	6f 4f       	mov.b	@r15,	r15	
     96ec:	c2 4f 6f 00 	mov.b	r15,	&0x006f	
-		SPI_WAIT_EOR();
     96f0:	5f 42 03 00 	mov.b	&0x0003,r15	
     96f4:	4f 4f       	mov.b	r15,	r15	
     96f6:	2f f2       	and	#4,	r15	;r2 As==10
     96f8:	0f 93       	tst	r15		
     96fa:	fa 27       	jz	$-10     	;abs 0x96f0
-}
-
-void spi_tx_burst(char *data, int len)
-{
-	int i;
-	for (i = 0; i < len; i++) {
     96fc:	94 53 f8 ff 	inc	-8(r4)		;0xfff8(r4)
     9700:	94 94 fc ff 	cmp	-4(r4),	-8(r4)	;0xfffc(r4), 0xfff8(r4)
     9704:	f8 ff 
     9706:	eb 3b       	jl	$-40     	;abs 0x96de
-		spi_clear_rx_IFG();
-		SPI_TX = data[i];
-		SPI_WAIT_EOR();
-	}
-}
     9708:	31 50 06 00 	add	#6,	r1	;#0x0006
     970c:	34 41       	pop	r4		
     970e:	30 41       	ret			
 
 00009710 <spi_rx_burst>:
-
-void spi_rx_burst(char *data, int len)
-{
     9710:	04 12       	push	r4		
     9712:	04 41       	mov	r1,	r4	
     9714:	24 53       	incd	r4		
     9716:	31 50 fa ff 	add	#-6,	r1	;#0xfffa
     971a:	84 4f fa ff 	mov	r15,	-6(r4)	;0xfffa(r4)
     971e:	84 4e fc ff 	mov	r14,	-4(r4)	;0xfffc(r4)
-	int i;
-	for (i = 0; i < len; i++) {
     9722:	84 43 f8 ff 	mov	#0,	-8(r4)	;r3 As==00, 0xfff8(r4)
     9726:	13 3c       	jmp	$+40     	;abs 0x974e
-		SPI_TX = SPI_DUMMY_BYTE;
     9728:	f2 40 55 00 	mov.b	#85,	&0x006f	;#0x0055
     972c:	6f 00 
-		SPI_WAIT_EOR();
     972e:	5f 42 03 00 	mov.b	&0x0003,r15	
     9732:	4f 4f       	mov.b	r15,	r15	
     9734:	2f f2       	and	#4,	r15	;r2 As==10
     9736:	0f 93       	tst	r15		
     9738:	fa 27       	jz	$-10     	;abs 0x972e
-		data[i] = SPI_RX;
     973a:	1f 44 f8 ff 	mov	-8(r4),	r15	;0xfff8(r4)
     973e:	1f 54 fa ff 	add	-6(r4),	r15	;0xfffa(r4)
     9742:	5e 42 6e 00 	mov.b	&0x006e,r14	
     9746:	cf 4e 00 00 	mov.b	r14,	0(r15)	;0x0000(r15)
-}
-
-void spi_rx_burst(char *data, int len)
-{
-	int i;
-	for (i = 0; i < len; i++) {
     974a:	94 53 f8 ff 	inc	-8(r4)		;0xfff8(r4)
     974e:	94 94 fc ff 	cmp	-4(r4),	-8(r4)	;0xfffc(r4), 0xfff8(r4)
     9752:	f8 ff 
     9754:	e9 3b       	jl	$-44     	;abs 0x9728
-		SPI_TX = SPI_DUMMY_BYTE;
-		SPI_WAIT_EOR();
-		data[i] = SPI_RX;
-	}
-}
     9756:	31 50 06 00 	add	#6,	r1	;#0x0006
     975a:	34 41       	pop	r4		
     975c:	30 41       	ret			
 
 0000975e <spi_select_radio>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void spi_select_radio(void)
-{
     975e:	04 12       	push	r4		
     9760:	04 41       	mov	r1,	r4	
     9762:	24 53       	incd	r4		
-	RADIO_ENABLE();
     9764:	5f 42 19 00 	mov.b	&0x0019,r15	
     9768:	7f f0 fe ff 	and.b	#-2,	r15	;#0xfffe
     976c:	c2 4f 19 00 	mov.b	r15,	&0x0019	
-}
     9770:	34 41       	pop	r4		
     9772:	30 41       	ret			
 
 00009774 <spi_deselect_radio>:
-
-void spi_deselect_radio(void)
-{
     9774:	04 12       	push	r4		
     9776:	04 41       	mov	r1,	r4	
     9778:	24 53       	incd	r4		
-	RADIO_DISABLE();
     977a:	5f 42 19 00 	mov.b	&0x0019,r15	
     977e:	5f d3       	bis.b	#1,	r15	;r3 As==01
     9780:	c2 4f 19 00 	mov.b	r15,	&0x0019	
-}
     9784:	34 41       	pop	r4		
     9786:	30 41       	ret			
 
 00009788 <Timer_A>:
-
-static volatile timer_cb timerA_cb;
-static volatile int timerA_wakeup;
-
-ISR(TIMERA0, Timer_A)
-{
     9788:	0f 12       	push	r15		
     978a:	0e 12       	push	r14		
     978c:	0d 12       	push	r13		
@@ -3869,22 +2779,16 @@ ISR(TIMERA0, Timer_A)
     9790:	04 12       	push	r4		
     9792:	04 41       	mov	r1,	r4	
     9794:	34 50 0a 00 	add	#10,	r4	;#0x000a
-	if (timerA_cb != NULL)
     9798:	1f 42 2a 02 	mov	&0x022a,r15	
     979c:	0f 93       	tst	r15		
     979e:	03 24       	jz	$+8      	;abs 0x97a6
-		timerA_cb();
     97a0:	1f 42 2a 02 	mov	&0x022a,r15	
     97a4:	8f 12       	call	r15		
-
-	if (timerA_wakeup == 1)
     97a6:	1f 42 2c 02 	mov	&0x022c,r15	
     97aa:	1f 93       	cmp	#1,	r15	;r3 As==01
     97ac:	03 20       	jnz	$+8      	;abs 0x97b4
-		LPM_OFF_ON_EXIT;
     97ae:	b4 c0 f0 00 	bic	#240,	0(r4)	;#0x00f0, 0x0000(r4)
     97b2:	00 00 
-}
     97b4:	34 41       	pop	r4		
     97b6:	3c 41       	pop	r12		
     97b8:	3d 41       	pop	r13		
@@ -3893,98 +2797,65 @@ ISR(TIMERA0, Timer_A)
     97be:	00 13       	reti			
 
 000097c0 <timerA_init>:
-
-void timerA_init(void)
-{
     97c0:	04 12       	push	r4		
     97c2:	04 41       	mov	r1,	r4	
     97c4:	24 53       	incd	r4		
-	timerA_cb = NULL;
     97c6:	82 43 2a 02 	mov	#0,	&0x022a	;r3 As==00
-	timerA_wakeup = 0;
     97ca:	82 43 2c 02 	mov	#0,	&0x022c	;r3 As==00
-	timerA_stop();
     97ce:	b0 12 5e 98 	call	#0x985e	
-}
     97d2:	34 41       	pop	r4		
     97d4:	30 41       	ret			
 
 000097d6 <timerA_register_cb>:
-
-void timerA_register_cb(timer_cb cb)
-{
     97d6:	04 12       	push	r4		
     97d8:	04 41       	mov	r1,	r4	
     97da:	24 53       	incd	r4		
     97dc:	21 83       	decd	r1		
     97de:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	timerA_cb = cb;
     97e2:	92 44 fc ff 	mov	-4(r4),	&0x022a	;0xfffc(r4)
     97e6:	2a 02 
-}
     97e8:	21 53       	incd	r1		
     97ea:	34 41       	pop	r4		
     97ec:	30 41       	ret			
 
 000097ee <timerA_set_wakeup>:
-
-void timerA_set_wakeup(int w)
-{
     97ee:	04 12       	push	r4		
     97f0:	04 41       	mov	r1,	r4	
     97f2:	24 53       	incd	r4		
     97f4:	21 83       	decd	r1		
     97f6:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	timerA_wakeup = w;
     97fa:	92 44 fc ff 	mov	-4(r4),	&0x022c	;0xfffc(r4)
     97fe:	2c 02 
-}
     9800:	21 53       	incd	r1		
     9802:	34 41       	pop	r4		
     9804:	30 41       	ret			
 
 00009806 <timerA_start_ticks>:
-
-void timerA_start_ticks(unsigned ticks)
-{
     9806:	04 12       	push	r4		
     9808:	04 41       	mov	r1,	r4	
     980a:	24 53       	incd	r4		
     980c:	21 83       	decd	r1		
     980e:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	BCSCTL3 |= LFXT1S_2;	// LFXT1 = VLO
     9812:	5f 42 53 00 	mov.b	&0x0053,r15	
     9816:	7f d0 20 00 	bis.b	#32,	r15	;#0x0020
     981a:	c2 4f 53 00 	mov.b	r15,	&0x0053	
-	TACCTL0 = CCIE;		// TCCR0 interrupt enabled
     981e:	b2 40 10 00 	mov	#16,	&0x0162	;#0x0010
     9822:	62 01 
-	TAR = 0;
     9824:	82 43 70 01 	mov	#0,	&0x0170	;r3 As==00
-	TACCR0 = ticks;
     9828:	92 44 fc ff 	mov	-4(r4),	&0x0172	;0xfffc(r4)
     982c:	72 01 
-	TACTL = TASSEL_1 + MC_1;	// ACLK, upmode
     982e:	b2 40 10 01 	mov	#272,	&0x0160	;#0x0110
     9832:	60 01 
-}
     9834:	21 53       	incd	r1		
     9836:	34 41       	pop	r4		
     9838:	30 41       	ret			
 
 0000983a <timerA_start_milliseconds>:
-
-#define VLO_FREQ 12000
-#define TICKS_IN_MS (VLO_FREQ/1000)
-
-void timerA_start_milliseconds(unsigned ms)
-{
     983a:	04 12       	push	r4		
     983c:	04 41       	mov	r1,	r4	
     983e:	24 53       	incd	r4		
     9840:	21 83       	decd	r1		
     9842:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	timerA_start_ticks(ms * TICKS_IN_MS);
     9846:	1e 44 fc ff 	mov	-4(r4),	r14	;0xfffc(r4)
     984a:	0f 4e       	mov	r14,	r15	
     984c:	0f 5f       	rla	r15		
@@ -3992,31 +2863,19 @@ void timerA_start_milliseconds(unsigned ms)
     9850:	0f 5f       	rla	r15		
     9852:	0f 5f       	rla	r15		
     9854:	b0 12 06 98 	call	#0x9806	
-}
     9858:	21 53       	incd	r1		
     985a:	34 41       	pop	r4		
     985c:	30 41       	ret			
 
 0000985e <timerA_stop>:
-
-void timerA_stop(void)
-{
     985e:	04 12       	push	r4		
     9860:	04 41       	mov	r1,	r4	
     9862:	24 53       	incd	r4		
-	TACTL = 0;
     9864:	82 43 60 01 	mov	#0,	&0x0160	;r3 As==00
-}
     9868:	34 41       	pop	r4		
     986a:	30 41       	ret			
 
 0000986c <Timer_B>:
-
-static volatile timer_cb timerB_cb;
-static volatile int timerB_wakeup;
-
-ISR(TIMERB0, Timer_B)
-{
     986c:	0f 12       	push	r15		
     986e:	0e 12       	push	r14		
     9870:	0d 12       	push	r13		
@@ -4024,22 +2883,16 @@ ISR(TIMERB0, Timer_B)
     9874:	04 12       	push	r4		
     9876:	04 41       	mov	r1,	r4	
     9878:	34 50 0a 00 	add	#10,	r4	;#0x000a
-	if (timerB_cb != NULL)
     987c:	1f 42 2e 02 	mov	&0x022e,r15	
     9880:	0f 93       	tst	r15		
     9882:	03 24       	jz	$+8      	;abs 0x988a
-		timerB_cb();
     9884:	1f 42 2e 02 	mov	&0x022e,r15	
     9888:	8f 12       	call	r15		
-
-	if (timerB_wakeup == 1)
     988a:	1f 42 30 02 	mov	&0x0230,r15	
     988e:	1f 93       	cmp	#1,	r15	;r3 As==01
     9890:	03 20       	jnz	$+8      	;abs 0x9898
-		LPM_OFF_ON_EXIT;
     9892:	b4 c0 f0 00 	bic	#240,	0(r4)	;#0x00f0, 0x0000(r4)
     9896:	00 00 
-}
     9898:	34 41       	pop	r4		
     989a:	3c 41       	pop	r12		
     989c:	3d 41       	pop	r13		
@@ -4048,95 +2901,65 @@ ISR(TIMERB0, Timer_B)
     98a2:	00 13       	reti			
 
 000098a4 <timerB_init>:
-
-void timerB_init(void)
-{
     98a4:	04 12       	push	r4		
     98a6:	04 41       	mov	r1,	r4	
     98a8:	24 53       	incd	r4		
-	timerB_cb = NULL;
     98aa:	82 43 2e 02 	mov	#0,	&0x022e	;r3 As==00
-	timerB_wakeup = 0;
     98ae:	82 43 30 02 	mov	#0,	&0x0230	;r3 As==00
-	timerB_stop();
     98b2:	b0 12 42 99 	call	#0x9942	
-}
     98b6:	34 41       	pop	r4		
     98b8:	30 41       	ret			
 
 000098ba <timerB_register_cb>:
-
-void timerB_register_cb(timer_cb cb)
-{
     98ba:	04 12       	push	r4		
     98bc:	04 41       	mov	r1,	r4	
     98be:	24 53       	incd	r4		
     98c0:	21 83       	decd	r1		
     98c2:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	timerB_cb = cb;
     98c6:	92 44 fc ff 	mov	-4(r4),	&0x022e	;0xfffc(r4)
     98ca:	2e 02 
-}
     98cc:	21 53       	incd	r1		
     98ce:	34 41       	pop	r4		
     98d0:	30 41       	ret			
 
 000098d2 <timerB_set_wakeup>:
-
-void timerB_set_wakeup(int w)
-{
     98d2:	04 12       	push	r4		
     98d4:	04 41       	mov	r1,	r4	
     98d6:	24 53       	incd	r4		
     98d8:	21 83       	decd	r1		
     98da:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	timerB_wakeup = w;
     98de:	92 44 fc ff 	mov	-4(r4),	&0x0230	;0xfffc(r4)
     98e2:	30 02 
-}
     98e4:	21 53       	incd	r1		
     98e6:	34 41       	pop	r4		
     98e8:	30 41       	ret			
 
 000098ea <timerB_start_ticks>:
-
-void timerB_start_ticks(unsigned ticks)
-{
     98ea:	04 12       	push	r4		
     98ec:	04 41       	mov	r1,	r4	
     98ee:	24 53       	incd	r4		
     98f0:	21 83       	decd	r1		
     98f2:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	BCSCTL3 |= LFXT1S_2;	// LFXT1 = VLO
     98f6:	5f 42 53 00 	mov.b	&0x0053,r15	
     98fa:	7f d0 20 00 	bis.b	#32,	r15	;#0x0020
     98fe:	c2 4f 53 00 	mov.b	r15,	&0x0053	
-	TBCCTL0 = CCIE;		// TCCR0 interrupt enabled
     9902:	b2 40 10 00 	mov	#16,	&0x0182	;#0x0010
     9906:	82 01 
-	TBR = 0;
     9908:	82 43 90 01 	mov	#0,	&0x0190	;r3 As==00
-	TBCCR0 = ticks;
     990c:	92 44 fc ff 	mov	-4(r4),	&0x0192	;0xfffc(r4)
     9910:	92 01 
-	TBCTL = TBSSEL_1 + MC_1;	// ACLK, upmode
     9912:	b2 40 10 01 	mov	#272,	&0x0180	;#0x0110
     9916:	80 01 
-}
     9918:	21 53       	incd	r1		
     991a:	34 41       	pop	r4		
     991c:	30 41       	ret			
 
 0000991e <timerB_start_milliseconds>:
-
-void timerB_start_milliseconds(unsigned ms)
-{
     991e:	04 12       	push	r4		
     9920:	04 41       	mov	r1,	r4	
     9922:	24 53       	incd	r4		
     9924:	21 83       	decd	r1		
     9926:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	timerB_start_ticks(ms * TICKS_IN_MS);
     992a:	1e 44 fc ff 	mov	-4(r4),	r14	;0xfffc(r4)
     992e:	0f 4e       	mov	r14,	r15	
     9930:	0f 5f       	rla	r15		
@@ -4144,235 +2967,146 @@ void timerB_start_milliseconds(unsigned ms)
     9934:	0f 5f       	rla	r15		
     9936:	0f 5f       	rla	r15		
     9938:	b0 12 ea 98 	call	#0x98ea	
-}
     993c:	21 53       	incd	r1		
     993e:	34 41       	pop	r4		
     9940:	30 41       	ret			
 
 00009942 <timerB_stop>:
-
-void timerB_stop(void)
-{
     9942:	04 12       	push	r4		
     9944:	04 41       	mov	r1,	r4	
     9946:	24 53       	incd	r4		
-	TBCTL = 0;
     9948:	82 43 80 01 	mov	#0,	&0x0180	;r3 As==00
-}
     994c:	34 41       	pop	r4		
     994e:	30 41       	ret			
 
 00009950 <uart_init>:
-/* ************************************************** */
-
-static volatile uart_cb_t uart_cb;
-
-void uart_init(int config)
-{
     9950:	04 12       	push	r4		
     9952:	04 41       	mov	r1,	r4	
     9954:	24 53       	incd	r4		
     9956:	21 83       	decd	r1		
     9958:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	P3SEL |= (BIT_TX | BIT_RX);	/* uart   */
     995c:	5f 42 1b 00 	mov.b	&0x001b,r15	
     9960:	7f d0 30 00 	bis.b	#48,	r15	;#0x0030
     9964:	c2 4f 1b 00 	mov.b	r15,	&0x001b	
-	P3DIR |= (BIT_TX);	/* output */
     9968:	5f 42 1a 00 	mov.b	&0x001a,r15	
     996c:	7f d0 10 00 	bis.b	#16,	r15	;#0x0010
     9970:	c2 4f 1a 00 	mov.b	r15,	&0x001a	
-	P3DIR &= ~(BIT_RX);	/* input  */
     9974:	5f 42 1a 00 	mov.b	&0x001a,r15	
     9978:	7f f0 df ff 	and.b	#-33,	r15	;#0xffdf
     997c:	c2 4f 1a 00 	mov.b	r15,	&0x001a	
-
-	switch (config) {
     9980:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     9984:	1f 93       	cmp	#1,	r15	;r3 As==01
     9986:	03 24       	jz	$+8      	;abs 0x998e
     9988:	3f 92       	cmp	#8,	r15	;r2 As==11
     998a:	12 24       	jz	$+38     	;abs 0x99b0
     998c:	23 3c       	jmp	$+72     	;abs 0x99d4
-	case UART_9600_SMCLK_1MHZ:
-		UCA0CTL1 = UCSSEL_2;	// SMCLK
     998e:	f2 40 80 ff 	mov.b	#-128,	&0x0061	;#0xff80
     9992:	61 00 
-		UCA0BR0 = 0x68;	// 9600 from 1Mhz
     9994:	f2 40 68 00 	mov.b	#104,	&0x0062	;#0x0068
     9998:	62 00 
-		UCA0BR1 = 0x00;
     999a:	c2 43 63 00 	mov.b	#0,	&0x0063	;r3 As==00
-		UCA0MCTL = UCBRS_2;
     999e:	e2 42 64 00 	mov.b	#4,	&0x0064	;r2 As==10
-		UCA0CTL1 &= ~UCSWRST;	// **Initialize USCI state machine**
     99a2:	5f 42 61 00 	mov.b	&0x0061,r15	
     99a6:	7f f0 fe ff 	and.b	#-2,	r15	;#0xfffe
     99aa:	c2 4f 61 00 	mov.b	r15,	&0x0061	
-		break;
     99ae:	13 3c       	jmp	$+40     	;abs 0x99d6
-
-	case UART_9600_SMCLK_8MHZ:
-		UCA0CTL1 = UCSSEL_2;	// SMCLK
     99b0:	f2 40 80 ff 	mov.b	#-128,	&0x0061	;#0xff80
     99b4:	61 00 
-		UCA0BR0 = 0x41;	// 9600 from 8Mhz
     99b6:	f2 40 41 00 	mov.b	#65,	&0x0062	;#0x0041
     99ba:	62 00 
-		UCA0BR1 = 0x03;
     99bc:	f2 40 03 00 	mov.b	#3,	&0x0063	;#0x0003
     99c0:	63 00 
-		UCA0MCTL = UCBRS_2;
     99c2:	e2 42 64 00 	mov.b	#4,	&0x0064	;r2 As==10
-		UCA0CTL1 &= ~UCSWRST;	// **Initialize USCI state machine**
     99c6:	5f 42 61 00 	mov.b	&0x0061,r15	
     99ca:	7f f0 fe ff 	and.b	#-2,	r15	;#0xfffe
     99ce:	c2 4f 61 00 	mov.b	r15,	&0x0061	
-		break;
     99d2:	01 3c       	jmp	$+4      	;abs 0x99d6
-
-	default:
-		break;
     99d4:	03 43       	nop			
-	}
-
-	uart_cb = NULL;
     99d6:	82 43 32 02 	mov	#0,	&0x0232	;r3 As==00
-}
     99da:	21 53       	incd	r1		
     99dc:	34 41       	pop	r4		
     99de:	30 41       	ret			
 
 000099e0 <uart_stop>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void uart_stop(void)
-{
     99e0:	04 12       	push	r4		
     99e2:	04 41       	mov	r1,	r4	
     99e4:	24 53       	incd	r4		
-}
     99e6:	34 41       	pop	r4		
     99e8:	30 41       	ret			
 
 000099ea <putchar>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-int putchar(int c)
-{
     99ea:	04 12       	push	r4		
     99ec:	04 41       	mov	r1,	r4	
     99ee:	24 53       	incd	r4		
     99f0:	21 83       	decd	r1		
     99f2:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	UCA0TXBUF = c;
     99f6:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     99fa:	4f 4f       	mov.b	r15,	r15	
     99fc:	c2 4f 67 00 	mov.b	r15,	&0x0067	
-	while (!(IFG2 & UCA0TXIFG)) ;	// USCI_A0 TX buffer ready?
     9a00:	03 43       	nop			
     9a02:	5f 42 03 00 	mov.b	&0x0003,r15	
     9a06:	4f 4f       	mov.b	r15,	r15	
     9a08:	2f f3       	and	#2,	r15	;r3 As==10
     9a0a:	0f 93       	tst	r15		
     9a0c:	fa 27       	jz	$-10     	;abs 0x9a02
-	return (unsigned char)c;
     9a0e:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
     9a12:	4f 4f       	mov.b	r15,	r15	
     9a14:	4f 4f       	mov.b	r15,	r15	
-}
     9a16:	21 53       	incd	r1		
     9a18:	34 41       	pop	r4		
     9a1a:	30 41       	ret			
 
 00009a1c <uart_getchar>:
-
-int uart_getchar(void)
-{
     9a1c:	04 12       	push	r4		
     9a1e:	04 41       	mov	r1,	r4	
     9a20:	24 53       	incd	r4		
     9a22:	21 83       	decd	r1		
-	int c;
-	c = UCA0RXBUF;
     9a24:	5f 42 66 00 	mov.b	&0x0066,r15	
     9a28:	c4 4f fc ff 	mov.b	r15,	-4(r4)	;0xfffc(r4)
     9a2c:	c4 43 fd ff 	mov.b	#0,	-3(r4)	;r3 As==00, 0xfffd(r4)
-	return c;
     9a30:	1f 44 fc ff 	mov	-4(r4),	r15	;0xfffc(r4)
-}
     9a34:	21 53       	incd	r1		
     9a36:	34 41       	pop	r4		
     9a38:	30 41       	ret			
 
 00009a3a <uart_eint>:
-/* ************************************************** */
-/* ************************************************** */
-/* ************************************************** */
-
-void uart_eint(void)
-{
     9a3a:	04 12       	push	r4		
     9a3c:	04 41       	mov	r1,	r4	
     9a3e:	24 53       	incd	r4		
-	IE2 |= UCA0RXIE;	// Enable USCI_A0 RX interrupt
     9a40:	5f 42 01 00 	mov.b	&0x0001,r15	
     9a44:	5f d3       	bis.b	#1,	r15	;r3 As==01
     9a46:	c2 4f 01 00 	mov.b	r15,	&0x0001	
-}
     9a4a:	34 41       	pop	r4		
     9a4c:	30 41       	ret			
 
 00009a4e <uart_dint>:
-
-void uart_dint(void)
-{
     9a4e:	04 12       	push	r4		
     9a50:	04 41       	mov	r1,	r4	
     9a52:	24 53       	incd	r4		
-	IE2 &= ~UCA0RXIE;
     9a54:	5f 42 01 00 	mov.b	&0x0001,r15	
     9a58:	7f f0 fe ff 	and.b	#-2,	r15	;#0xfffe
     9a5c:	c2 4f 01 00 	mov.b	r15,	&0x0001	
-}
     9a60:	34 41       	pop	r4		
     9a62:	30 41       	ret			
 
 00009a64 <uart_register_cb>:
-
-void uart_register_cb(uart_cb_t cb)
-{
     9a64:	04 12       	push	r4		
     9a66:	04 41       	mov	r1,	r4	
     9a68:	24 53       	incd	r4		
     9a6a:	21 83       	decd	r1		
     9a6c:	84 4f fc ff 	mov	r15,	-4(r4)	;0xfffc(r4)
-	uart_cb = cb;
     9a70:	92 44 fc ff 	mov	-4(r4),	&0x0232	;0xfffc(r4)
     9a74:	32 02 
-	if (cb == NULL) {
     9a76:	84 93 fc ff 	tst	-4(r4)		;0xfffc(r4)
     9a7a:	03 20       	jnz	$+8      	;abs 0x9a82
-		uart_dint();
     9a7c:	b0 12 4e 9a 	call	#0x9a4e	
     9a80:	02 3c       	jmp	$+6      	;abs 0x9a86
-	} else {
-		uart_eint();
     9a82:	b0 12 3a 9a 	call	#0x9a3a	
-	}
-}
     9a86:	21 53       	incd	r1		
     9a88:	34 41       	pop	r4		
     9a8a:	30 41       	ret			
 
 00009a8c <usart0irq>:
-
-ISR(USCIAB0RX, usart0irq)
-{
     9a8c:	0f 12       	push	r15		
     9a8e:	0e 12       	push	r14		
     9a90:	0d 12       	push	r13		
@@ -4381,36 +3115,24 @@ ISR(USCIAB0RX, usart0irq)
     9a96:	04 41       	mov	r1,	r4	
     9a98:	34 50 0a 00 	add	#10,	r4	;#0x000a
     9a9c:	21 83       	decd	r1		
-	volatile unsigned char dummy;
-	/* Check status register for receive errors. */
-	if (UCA0STAT & UCRXERR) {
     9a9e:	5f 42 65 00 	mov.b	&0x0065,r15	
     9aa2:	4f 4f       	mov.b	r15,	r15	
     9aa4:	2f f2       	and	#4,	r15	;r2 As==10
     9aa6:	0f 93       	tst	r15		
     9aa8:	0a 24       	jz	$+22     	;abs 0x9abe
-		/* Clear error flags by forcing a dummy read. */
-		dummy = UCA0RXBUF;
     9aaa:	5f 42 66 00 	mov.b	&0x0066,r15	
     9aae:	c4 4f f4 ff 	mov.b	r15,	-12(r4)	;0xfff4(r4)
-		dummy += 1; /* warning gcc otherwise! */
     9ab2:	5f 44 f4 ff 	mov.b	-12(r4),r15	;0xfff4(r4)
     9ab6:	5f 53       	inc.b	r15		
     9ab8:	c4 4f f4 ff 	mov.b	r15,	-12(r4)	;0xfff4(r4)
     9abc:	0a 3c       	jmp	$+22     	;abs 0x9ad2
-	} else {
-		if (uart_cb(UCA0RXBUF) != 0) {
     9abe:	1e 42 32 02 	mov	&0x0232,r14	
     9ac2:	5f 42 66 00 	mov.b	&0x0066,r15	
     9ac6:	8e 12       	call	r14		
     9ac8:	0f 93       	tst	r15		
     9aca:	03 24       	jz	$+8      	;abs 0x9ad2
-			LPM_OFF_ON_EXIT;
     9acc:	b4 c0 f0 00 	bic	#240,	0(r4)	;#0x00f0, 0x0000(r4)
     9ad0:	00 00 
-		}
-	}
-}
     9ad2:	21 53       	incd	r1		
     9ad4:	34 41       	pop	r4		
     9ad6:	3c 41       	pop	r12		
@@ -4420,39 +3142,24 @@ ISR(USCIAB0RX, usart0irq)
     9ade:	00 13       	reti			
 
 00009ae0 <watchdog_stop>:
-#endif
-
-static int watchdog_backup;
-
-void watchdog_stop()
-{
     9ae0:	04 12       	push	r4		
     9ae2:	04 41       	mov	r1,	r4	
     9ae4:	24 53       	incd	r4		
-	/* the upper 8 bits are a password */
-	watchdog_backup = WDTCTL & 0x00FF;
     9ae6:	1f 42 20 01 	mov	&0x0120,r15	
     9aea:	3f f0 ff 00 	and	#255,	r15	;#0x00ff
     9aee:	82 4f 34 02 	mov	r15,	&0x0234	
-	WDTCTL = WDTPW | WDTHOLD;
     9af2:	b2 40 80 5a 	mov	#23168,	&0x0120	;#0x5a80
     9af6:	20 01 
-}
     9af8:	34 41       	pop	r4		
     9afa:	30 41       	ret			
 
 00009afc <watchdog_restore>:
-
-void watchdog_restore()
-{
     9afc:	04 12       	push	r4		
     9afe:	04 41       	mov	r1,	r4	
     9b00:	24 53       	incd	r4		
-	WDTCTL = WDTPW | watchdog_backup;
     9b02:	1f 42 34 02 	mov	&0x0234,r15	
     9b06:	3f d0 00 5a 	bis	#23040,	r15	;#0x5a00
     9b0a:	82 4f 20 01 	mov	r15,	&0x0120	
-}
     9b0e:	34 41       	pop	r4		
     9b10:	30 41       	ret			
 
@@ -4938,7 +3645,7 @@ void watchdog_restore()
     9fb8:	30 00 
     9fba:	0e 93       	tst	r14		
     9fbc:	02 20       	jnz	$+6      	;abs 0x9fc2
-    9fbe:	3e 40 94 a5 	mov	#-23148,r14	;#0xa594
+    9fbe:	3e 40 98 a5 	mov	#-23144,r14	;#0xa598
     9fc2:	11 12 04 00 	push	4(r1)		;0x0004(r1)
     9fc6:	11 12 04 00 	push	4(r1)		;0x0004(r1)
     9fca:	1d 41 34 00 	mov	52(r1),	r13	;0x0034(r1)
