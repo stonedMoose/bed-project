@@ -11,16 +11,17 @@ stopped=False
 ip='192.168.43.134'
 
 def signal_handler(signal,frame) :
-	print "End"
+	print('End')
 	t1.stop()
 	stopped=True
 	s.close()
 	sys.exit(0)
 
 class UpStream(threading.Thread) :
-	def __init__(self,s):
+	def __init__(self,s,q):
 		threading.Thread.__init__(self)
 		self.s=s
+		#self.q=q
 		self.__stop__event=threading.Event()
 	def stop(self) :
 		self.__stop__event.set()
@@ -29,41 +30,49 @@ class UpStream(threading.Thread) :
 	def run(self) :
 		print('Connection on '+format(upStreamPort))
 		while self.stopped()!=True :
-			#get data from ezconsole
-			#parse data
-			data=raw_input('Data to send : ')
-			if len(data)>0 :
-				self.s.send(data)
-			else :
-				self.stop()
+			#get data from queue
+			#if self.q.empty()!=True :
+				#parse data
+				#data=self.q.get()
+				#print('To send : '+data)
+				data=raw_input('Data to send : ')
+				if len(data)>0 :
+					self.s.send(data)
+				else :
+					self.stop()
 		print('T1 : Close')
 		#self.s.close()
 
+
+#def sender(q) :
 signal.signal(signal.SIGINT,signal_handler)
 host = raw_input('@IP of the MasterPi : ') # @IP of MasterPi
 if len(host)==0 :
 	host=ip
-print("host : " + host)
+print('host : ' + host)
 s=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 s.bind(('',5555))
 s.connect((host, upStreamPort))
+#temp value for q, comment it if using launcher.py
+q=0
 
-t1=UpStream(s)
+#starts the queue reading + temp forwarding
+t1=UpStream(s,q)
 t1.start()
 
 while stopped==False :
 	command=s.recv(255)
 	if len(command)>0 :
 		#parse the command : check if the command is for our network, then send it on the uart
-		print 'command : '+command
+		print('command : '+command)
 		#toTransmit = slaveId*10 +' '
 	else :
-		print "Error in message"
+		print('Error in message')
 		stop()
 
 t1.join()
-print "Out of loop"
+print('Out of loop')
 s.close()
 
 ''' Structure de l'algo du SlavePi
