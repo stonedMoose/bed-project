@@ -3,6 +3,7 @@ import subprocess
 import re
 import os
 import json
+import platform
 from multiprocessing import Queue
 
 def execute(cmd):
@@ -17,7 +18,10 @@ def execute(cmd):
 
 def parse(queue):
     dir_path = os.path.dirname(os.path.realpath(__file__))
-    bin_path = os.path.join(dir_path, "ezconsole", "ezconsole")
+    if platform.architecture() == ('32bit', 'ELF'):
+        bin_path = os.path.join(dir_path, "ezconsole", "ezconsole_bin_raspberry")
+    else:
+        bin_path = os.path.join(dir_path, "ezconsole", "ezconsole")
     for line in execute(bin_path):
         if "temperature" in line:
             try:
