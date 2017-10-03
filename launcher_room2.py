@@ -12,7 +12,7 @@ def reader(queue):
 # cree une queue de taille 10
 q = Queue(10)
 
-parser_process = Process(target=parse, args=(q,))
+parser_process = Process(target=parse, args=(q, 2,))
 parser_process.daemon = True
 parser_process.start()        # Launch reader() as a separate python process
 

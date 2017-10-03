@@ -22,7 +22,7 @@ def execute(cmd):
         raise subprocess.CalledProcessError(return_code, cmd)
 
 
-def parse(queue):
+def parse(queue, room_nb):
     dir_path = os.path.dirname(os.path.realpath(__file__))
     if platform.architecture() == ('32bit', 'ELF'):
         bin_path = os.path.join(dir_path, "ezconsole", "ezconsole_bin_raspberry")
@@ -33,7 +33,8 @@ def parse(queue):
             try:
                 # print(line)
                 values = json.loads(line)
-                queue.put(values)
+                if re.match(r"^" + room_nb + "\d", values['id']):
+                    queue.put(values)
             except ValueError:
                 pass
 
