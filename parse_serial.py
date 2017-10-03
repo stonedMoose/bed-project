@@ -6,6 +6,12 @@ import json
 import platform
 from multiprocessing import Queue
 
+# h1 rsp 1
+# h2 rsp 2
+# 11, 12 salle 1
+# 21, 22 salle 2
+
+
 def execute(cmd):
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
     for stdout_line in iter(popen.stdout.readline, ""):
