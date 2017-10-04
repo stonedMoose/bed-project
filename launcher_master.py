@@ -22,7 +22,7 @@ gui_process = Process(target=main_gui, args=(q,))
 gui_process.daemon = True
 gui_process.start()        # Launch reader() as a separate python process
 
-server_process = Process(target=server_process, args=(q,))
+server_process = Process(target=main, args=(q,))
 server_process.daemon = True
 server_process.start()
 
