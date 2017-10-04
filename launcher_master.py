@@ -13,10 +13,7 @@ def interrupt():
     gui_process.terminate()
     server_process.terminate()
 
-signal(SIGINT, interrupt)
-capteur_txt = [f for f in os.listdir(os.path.dirname(os.path.realpath(__file__))) if "capteur" in f]
-for c in capteur_txt:
-    shutil.rmtree(c)
+
 
 # cree une queue de taille 10
 q = Queue(10)

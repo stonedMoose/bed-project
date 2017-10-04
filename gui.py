@@ -4,7 +4,7 @@ from Tkinter import *
 from ttk import *
 import os
 import matplotlib.pyplot as plt
-from server import setBaseTemp
+#from server import setBaseTemp
 
 
 def update_temp(entry, room_nb):

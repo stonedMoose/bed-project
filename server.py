@@ -6,20 +6,20 @@ import socket, threading,signal,sys
 
 
 class ClientHandler(threading.Thread):
-        def __init__(self,ip,port,socket, queue):
+        def __init__(self,ip,port,socket,q):
                 threading.Thread.__init__(self)
                 self.ip=ip
                 self.port=port
                 self.socket=socket
-                self.queue = queue
+                self.queue = q
                 print " [+] New thread started for client "+ip+" : "+str(port)
-                self.__stop__event=threading.Event()
+		self.__stop__event=threading.Event()
 
-        def stop(self):
-            self.__stop__event.set()
+	def stop(self):
+		self.__stop__event.set()
 
-        def stopped(self):
-            return self.__stop__event.is_set()
+	def stopped(self):
+		return self.__stop__event.is_set()
 
         def writeTempFile(self,room,sensor,temp):
                 name="capteur"+room+sensor+".txt"
@@ -48,43 +48,45 @@ class ClientHandler(threading.Thread):
                 global baseTemp2
                 print self.ip+": bt1:"+str(baseTemp1)+" bt2:"+str(baseTemp2)+"\n"
 
+                
         def run(self):
                 print "\n Connection from : "+self.ip+" : "+str(self.port)+" with socket"+str(self.socket.getsockname())+"\n"
                 data="dump"
-                while not self.stopped():
+                while self.stopped()!=True:
                         data=self.socket.recv(255)
-                        if not data:
-                            self.stop()
-                            break
-                        print "data received"+data+"\n"
-                        dataList=data.split('|')
-                        for item in dataList:
-                                            if item:
-                                                    room=item[0]
-                                                    #test
-                                                    sensor=item[1]
-                                                    temp=item[3:]
-                                                    print "\n client "+ self.ip+":" +str(self.port)+" : room "+room+" sensor "+sensor+" temp "+temp
-                                                    temp=temp.replace(",",".")
-                                                    temp=float(temp)
-                                                    #write temp
-                                                    self.writeTempFile(room,sensor,temp)
-                                                    #response
-                                                    self.sendResp(int(room),temp)
-                        while not self.queue.empty():
-                            room, temp = self.queue.get()
-                            setBaseTemp(temp, room)
+			if not data:
+				self.stop()
+				break
+			print "data received"+data+"\n"
+			dataList=data.split('|')
+			while not self.queue.empty():
+                                room, temp = self.queue.get()
+                                setBaseTemp(temp, room)
+			for item in dataList:
+                                if item:
+                                        room=item[0]
+                                        #test
+                                        sensor=item[1]
+                                        temp=item[3:]
+                                        print "\n client "+ self.ip+":" +str(self.port)+" : room "+room+" sensor "+sensor+" temp "+temp
+                                        temp=temp.replace(",",".")
+                                        temp=float(temp)
+                                        #write temp
+                                        self.writeTempFile(room,sensor,temp)
+                                        #response
+                                        self.sendResp(int(room),temp)
                 print " Client disconnected"       
                 self.socket.close()        
                         
 
 def signal_handler(signal,frame):
         global serverSocket,threads
-        print "Close"
-        serverSocket.close()
-        for i in threads:
-            i.stop()
-        sys.exit(0)
+	print "Close"
+	serverSocket.close()
+	for t in threads:
+		t.stop()
+		#t.join()
+	sys.exit(0)
 
 
 
@@ -94,7 +96,7 @@ def setBaseTemp(newTemp,salle):
        global threads
        print "newTemp: ", newTemp,"room", salle
        if salle==1:
-           baseTemp1=newTemp
+               baseTemp1=newTemp
        elif salle==2:
                baseTemp2=newTemp
        try:
@@ -102,7 +104,6 @@ def setBaseTemp(newTemp,salle):
                       t.showBaseTemp()
        except NameError:
                pass
-
 
 def main(queue):
         
@@ -126,14 +127,13 @@ def main(queue):
 
         threads=[] 
 
-        while True:
+        while True :
                 try:
                         serverSocket.listen(5)
                         print "\n Listening for incoming connections..."
                         (clientSocket, (ip,port))=serverSocket.accept()
                         newClientHandlerThread=ClientHandler(ip,port,clientSocket, queue)
                         newClientHandlerThread.start()
-                        newClientHandlerThread.join()
                         threads.append(newClientHandlerThread)
                         threads[-1].showBaseTemp() 
                 except KeyboardInterrupt:
