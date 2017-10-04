@@ -71,6 +71,62 @@ int timer_reached(uint16_t timer, uint16_t count) {
     return (timer >= count);
 }
 
+static void printhex(char *buffer, unsigned int len)
+{
+    unsigned int i;
+    for(i = 0; i < len; i++)
+    {
+        printf("%02X ", buffer[i]);
+    }
+    printf("\n");
+}
+
+static int converter(char a, char b){
+    char s[4];
+    sprintf(s,"%02X%02X \n",a,b);
+    int number[4]; 
+    int i;
+    for(i=0;i<4;i++){
+        switch(s[i]){
+            case '0':
+                number[3-i]=0;break;
+            case '1':
+                number[3-i]=1;break;
+            case '2':
+                number[3-i]=2;break;
+            case '3':
+                number[3-i]=3;break;
+            case '4':
+                number[3-i]=4;break;
+            case '5':
+                number[3-i]=5;break;
+            case '6':
+                number[3-i]=6;break;
+            case '7':
+                number[3-i]=7;break;
+            case '8':
+                number[3-i]=8;break;
+            case '9':
+                number[3-i]=9;break;
+            case 'A':
+                number[3-i]=10;break;
+            case 'B':
+                number[3-i]=11;break;
+            case 'C':
+                number[3-i]=12;break;
+            case 'D':
+                number[3-i]=13;break;
+            case 'E':        
+                number[3-i]=14;break;
+            case 'F':        
+                number[3-i]=15;break;
+        }
+    }
+    return number[0]+number[1]*16+number[2]*16*16+number[3]*16*16*16;
+    
+}
+
+
 
 /*
  * LEDs
@@ -114,7 +170,7 @@ static PT_THREAD(thread_uart(struct pt *pt))
 	PT_WAIT_UNTIL(pt, timer_reached(TIMER_UART, DELAY_UART));
 	led_green_flag=1;
 	int temperature = adc10_sample_temp();
-    printf("{\"id\" : \"0\", \"temperature\" : \"%d,%d\"}\n",temperature/10,temperature%10);
+    printf("{\"id\" : \"20\", \"temperature\" : \"%d,%d\"}\n\r",temperature/10,temperature%10);
     }
     
     PT_END(pt);
@@ -135,7 +191,8 @@ void radio_cb(uint8_t *buffer, int size, int8_t rssi)
         }
         else
         {
-            DBG_PRINTF("msg packet error size=%d\r\n",size);
+            //DBG_PRINTF("msg packet error size=%d\r\n",size);
+            //J'ai commenté la ligne supérieure pour la démo
         }
 
     cc2500_rx_enter();
@@ -159,10 +216,16 @@ static PT_THREAD(thread_rx(struct pt *pt))
 void ezdisplay(char message[])
 {
     char mspid=message[0];
-    int msptemperature=message[1];
-    int msptemperaturefill=message[2];
-   // printf("{'id' : %c, 'temperature' : %d,%d}\n", mspid, msptemperature,msptemperaturefill);
-    printf("fullmessage : %s\n", message);
+    char msptemperature1=message[1];
+    char msptemperature2=message[2];
+    int temperature=converter(msptemperature1, msptemperature2);
+    int room=0;
+    if (mspid>=49 && mspid<=57){room=1;}
+    else if(mspid>=65 && mspid<=90){room=2;mspid-=16;}
+    else if(mspid>=97 && mspid<=122){room=2;;mspid-=48;}
+    if(room!=0){
+        printf("{\"id\" : \"%d%c\", \"temperature\" : \"%d,%d\"}\n\r", room, mspid, temperature/10, temperature%10);
+    }
 }
 
 
