@@ -4,7 +4,7 @@ from multiprocessing import Process, Queue
 from server import main
 from gui import main_gui
 from signal import signal, SIGINT
-
+import shutil, os
 
 global gui_process, server_process
 
@@ -14,6 +14,9 @@ def interrupt():
     server_process.terminate()
 
 signal(SIGINT, interrupt)
+capteur_txt = [f for f in os.listdir(os.path.dirname(os.path.realpath(__file__))) if "capteur" in f]
+for c in capteur_txt:
+    shutil.rmtree(c)
 
 # cree une queue de taille 10
 q = Queue(10)
