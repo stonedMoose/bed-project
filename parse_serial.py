@@ -33,7 +33,7 @@ def parse(queue, room_nb):
             try:
                 # print(line)
                 values = json.loads(line)
-                if re.match(r"^" + room_nb + "\d", values['id']):
+                if re.match(r"^" + str(room_nb) + "\d", values['id']):
                     queue.put(values)
             except ValueError:
                 pass

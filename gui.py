@@ -88,6 +88,7 @@ def tracer(id):
     plt.get_current_fig_manager().window.geometry("600x600+500+0")
     plt.show()
 
+
 def temperature(fichier):
     """
     Retrieve temperature list in fichier
@@ -141,7 +142,7 @@ def init(styles):
 def add_interfaces(ids):
     old_room_identifier = None
     i=0
-    w=0
+    h=0
     for id in ids:
         room_identifier = str(id)[0]
         room_initialized = room_identifier == old_room_identifier
@@ -149,12 +150,12 @@ def add_interfaces(ids):
             old_room_identifier = str(id)[0]
             create_room_interface(str(id)[0], i)
             i += 2
-            w += 35
+            h += 35
 
         create_sensor_interface(id, styles[i % len(styles)], i)
         i += 1
         w += 28
-    tk.geometry("450x" + str(w))
+    tk.geometry("450x" + str(h))
 
 
 def clear_grid():

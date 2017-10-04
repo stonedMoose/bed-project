@@ -4,10 +4,12 @@ from multiprocessing import Process, Queue
 from parse_serial import parse
 from client import gateway
 
-def reader(queue):
-    while True:
-        if not queue.empty():
-            print q.get(), "\r"
+global parser_process, gw_process
+
+
+def interrupt():
+    parser_process.terminate()
+    gw_process.terminate()
 
 # cree une queue de taille 10
 q = Queue(10)

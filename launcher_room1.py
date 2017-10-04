@@ -3,11 +3,17 @@ from multiprocessing import Process, Queue
 # import here the function reading serial and the one sending data through wifi #
 from parse_serial import parse
 from client import gateway
+from signal import signal, SIGINT
 
-def reader(queue):
-    while True:
-        if not queue.empty():
-            print q.get(), "\r"
+
+global parser_process, gw_process
+
+
+def interrupt():
+    parser_process.terminate()
+    gw_process.terminate()
+
+signal(SIGINT, interrupt)
 
 # cree une queue de taille 10
 q = Queue(10)
