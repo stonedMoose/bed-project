@@ -66,8 +66,8 @@ def gateway(qUp,qDown) :
 			command_list=command.split('|')
 			for item in command_list :
 				if item :
-				print('command : '+item+'\r')
-				qDown.put(item[0]+' '+item[2:])
+					print('command : '+item+'\r')
+					qDown.put(item[0]+' '+item[2:])
 		else :
 			print('Error in message')
 			stop()
