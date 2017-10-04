@@ -24,7 +24,7 @@ def update_temp(entry, room_nb):
             if temp < 0 or temp > 100:
                 print "The temperature must be between 0 and 100"
             else:
-                setBaseTemp(temp, room_nb)
+                q.put([room_nb, temp])
                 print "Sending message to update temp:", temp, "of room", room_nb
         entry.delete(0, "end")  # delete all the text in the entry
         entry.insert(0, 'Entrez une temperature')
@@ -178,14 +178,16 @@ styles = [
     ["pink.Horizontal.TProgressbar", "pink"],
 ]
 
-global items, tk, LABEL, BAR, IMG, fig, ax
-LABEL = 0
-BAR = 1
-items = dict()
-tk = Tk()
-IMG = PhotoImage(file="graphe.png")
-ids_list = []
+def main_gui(queue):
+    global items, tk, LABEL, BAR, IMG, fig, ax, q
+    q = queue
+    LABEL = 0
+    BAR = 1
+    items = dict()
+    tk = Tk()
+    IMG = PhotoImage(file="graphe.png")
+    ids_list = []
 
-init(styles)
-refresher(ids_list)
-tk.mainloop()
+    init(styles)
+    refresher(ids_list)
+    tk.mainloop()
