@@ -63,9 +63,11 @@ def gateway(qUp,qDown) :
 		command=s.recv(255)
 		if len(command)>0 :
 			#parse the command : check if the command is for our network, then send it on the uart
-			print('command : '+command+'\r')
-			qDown.put(command[0]+' '+command[2:])
-			#toTransmit = slaveId*10 +' '
+			command_list=command.split('|')
+			for item in command_list :
+				if item :
+					print('command : '+item+'\r')
+					qDown.put(item[0]+' '+item[2:])
 		else :
 			print('Error in message')
 			stop()
