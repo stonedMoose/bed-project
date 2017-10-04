@@ -4,7 +4,7 @@ from Tkinter import *
 from ttk import *
 import os
 import matplotlib.pyplot as plt
-# from server import setBaseTemp
+from server import setBaseTemp
 
 
 def update_temp(entry, room_nb):
@@ -19,11 +19,12 @@ def update_temp(entry, room_nb):
             temp = float(entry.get())
         except ValueError:
             print "You must enter float or int value for a temperature"
-            # setBaseTemp(value, salle)
+            
         else:
             if temp < 0 or temp > 100:
                 print "The temperature must be between 0 and 100"
             else:
+                setBaseTemp(temp, room_nb)
                 print "Sending message to update temp:", temp, "of room", room_nb
         entry.delete(0, "end")  # delete all the text in the entry
         entry.insert(0, 'Entrez une temperature')
@@ -100,7 +101,7 @@ def temperature(fichier):
         with open(file_path) as f:
             c = 0
             for line in f:
-                liste.append(int(line))
+                liste.append(float(line))
     except IOError:
         pass
     return liste
@@ -154,7 +155,7 @@ def add_interfaces(ids):
 
         create_sensor_interface(id, styles[i % len(styles)], i)
         i += 1
-        w += 28
+        h += 28
     tk.geometry("450x" + str(h))
 
 
