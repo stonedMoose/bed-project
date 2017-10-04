@@ -1,4 +1,4 @@
-	#!/usr/bin/env python
+#!/usr/bin/env python
 # coding: utf-8
 
 import socket,signal,sys,threading
@@ -34,11 +34,10 @@ class UpStream(threading.Thread) :
 			if self.q.empty()!=True :
 				#parse data
 				data=self.q.get()
-				print('To send : '+str(data)+'\r')
 				#data=raw_input('Data to send : ')
 				if len(data)>0 :
-					self.s.send(data['id']+' '+data['temperature'])
-					print(data['id']+' '+data['temperature']+'\r')
+					self.s.send(data['id']+' '+data['temperature']+'|')
+					print('Sending : '+str(data)+'\r')
 				else :
 					self.stop()
 		print('T1 : Close')
