@@ -64,7 +64,7 @@ def create_sensor_interface(id, style, row_rank):
     """
     b = Button(tk,
                text="Capteur {:2}".format(str(id)[1]),
-               command=lambda: matplotlib_tracer(id),
+               command=lambda: tracer(id),
                image=IMG, compound="left")
     p = Progressbar(tk, style=style[0], orient="horizontal", length=300, mode="determinate", maximum=100, value=0)
     l = Label(tk, text="", foreground="white", background=style[1], font=("Helvetica", 12), width=4, anchor=CENTER)
@@ -76,45 +76,8 @@ def create_sensor_interface(id, style, row_rank):
 
 
 def tracer(id):
-    """
-    Draw temperatures history
-    """
     fichier = "capteur" + str(id) + ".txt"
-    d = 20
-    h = w = 500
-
-    tl = Toplevel()
-    tl.title(fichier)
-    tl.resizable(height=False, width=False)
-    c = Canvas(tl, height=h, width=w)
-    c.pack()
-
-    xmin, xmax, ymin, ymax = 0, 100, 0, 100
-    unx = w / (xmax - xmin)
-    uny = h / (ymax - ymin)
-
-    c.create_line((xmin - xmin) * unx + d, (ymax - ymin) * uny - d, (xmax - xmin) * unx - d, (ymax - ymin) * uny - d)
-    c.create_line((xmin - xmin) * unx + d, (ymax - ymin) * uny - d, (xmin - xmin) * unx + d, (ymax - ymax) * uny + d)
-
-    for i in range(11):
-        c.create_line((0 - xmin) * unx + d, (ymax - 10 * i) * uny + d, (2 - xmin) * unx + d, (ymax - 10 * i) * uny + d)
-        c.create_text((-2 - xmin) * unx + d, (ymax - 10 * i) * uny + d, text='%d' % (10 * i))
-        c.create_line((10 * i - xmin) * unx + d, (ymax - 10) * uny + d, (10 * i - xmin) * unx + d, (ymax - 8) * uny + d)
-        c.create_text((10 * i - xmin) * unx + d, (ymax - 6) * uny + d, text='%d' % i)
-
-    l, _ = temperature(fichier)
-    l2 = []
-    for i in range(len(l)):
-        l2.append([(l[i][0] - xmin) * unx + d, (ymax - l[i][1]) * uny + d])
-        c.create_oval(l2[i][0] - 5, l2[i][1] - 5, l2[i][0] + 5, l2[i][1] + 5, fill='blue')
-
-    if len(l2) >= 2:
-        c.create_line(l2, fill="red")
-
-
-def matplotlib_tracer(id):
-    fichier = "capteur" + str(id) + ".txt"
-    _, y = temperature(fichier)
+    y = temperature(fichier)
     x = [i for i, _ in enumerate(y)]
 
     plt.cla()
@@ -125,23 +88,22 @@ def matplotlib_tracer(id):
     plt.get_current_fig_manager().window.geometry("600x600+500+0")
     plt.show()
 
+
 def temperature(fichier):
     """
     Retrieve temperature list in fichier
     """
     dir_path = os.path.dirname(os.path.realpath(__file__))
     file_path = os.path.join(dir_path, fichier)
-    couple_liste, liste = [], []
+    liste = []
     try:
         with open(file_path) as f:
             c = 0
             for line in f:
                 liste.append(int(line))
-                couple_liste.append([c, int(line)])
-                c += 10
     except IOError:
         pass
-    return couple_liste, liste
+    return liste
 
 
 def refresher(ids):
@@ -155,10 +117,10 @@ def refresher(ids):
 
     # loop updating progress bar and value label
     for id in sorted(items.keys()):
-        temp_list, a = temperature("capteur" + str(id) + ".txt")
+        temp_list= temperature("capteur" + str(id) + ".txt")
 
         if temp_list:
-            t = temp_list[-1][1]
+            t = temp_list[-1]
             items[id][LABEL].configure(text=str(t))
             items[id][BAR].configure(value=t)
 
@@ -180,7 +142,7 @@ def init(styles):
 def add_interfaces(ids):
     old_room_identifier = None
     i=0
-    w=0
+    h=0
     for id in ids:
         room_identifier = str(id)[0]
         room_initialized = room_identifier == old_room_identifier
@@ -188,12 +150,12 @@ def add_interfaces(ids):
             old_room_identifier = str(id)[0]
             create_room_interface(str(id)[0], i)
             i += 2
-            w += 35
+            h += 35
 
         create_sensor_interface(id, styles[i % len(styles)], i)
         i += 1
         w += 28
-    tk.geometry("450x" + str(w))
+    tk.geometry("450x" + str(h))
 
 
 def clear_grid():

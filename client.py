@@ -34,18 +34,17 @@ class UpStream(threading.Thread) :
 			if self.q.empty()!=True :
 				#parse data
 				data=self.q.get()
-				print('To send : '+data)
 				#data=raw_input('Data to send : ')
 				if len(data)>0 :
-					self.s.send(data['id']+' '+data['temperature'])
-					print(data['id']+' '+data['temperature'])
+					self.s.send(data['id']+' '+data['temperature']+'|')
+					print('Sending : '+str(data)+'\r')
 				else :
 					self.stop()
 		print('T1 : Close')
 		#self.s.close()
 
 
-def gateway(qUp) :
+def gateway(qUp,qDown) :
 	signal.signal(signal.SIGINT,signal_handler)
 	#host = raw_input('@IP of the MasterPi : ') # @IP of MasterPi
 	#if len(host)==0 :
@@ -55,8 +54,6 @@ def gateway(qUp) :
 	s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 	s.bind(('',5555))
 	s.connect((host, upStreamPort))
-	#temp value for qUp, comment it if using launcher.py
-	#qUp=0
 
 	#starts the queue reading + temp forwarding
 	t1=UpStream(s,qUp)
@@ -66,7 +63,7 @@ def gateway(qUp) :
 		command=s.recv(255)
 		if len(command)>0 :
 			#parse the command : check if the command is for our network, then send it on the uart
-			print('command : '+command)
+			print('command : '+command+'\r')
 			qDown.put(command[0]+' '+command[2:])
 			#toTransmit = slaveId*10 +' '
 		else :
