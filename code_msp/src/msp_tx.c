@@ -39,8 +39,10 @@
 
 /* 100 Hz timer A */
 #define TIMER_PERIOD_MS 10
+#define TIMER_SEND 1050
+#define TIMER_SENSING_TEMP 100
 
-#define PKTLEN 3
+#define PKTLEN 28
 #define MAX_HOPS 3
 #define MSG_BYTE_TYPE 0U
 #define MSG_BYTE_HOPS 1U
@@ -59,7 +61,7 @@
 #define ID_INPUT_TIMEOUT_TICKS (ID_INPUT_TIMEOUT_SECONDS*1000/TIMER_PERIOD_MS)
 static unsigned int node_id;
 
-#define NUM_TIMERS 6
+#define NUM_TIMERS 7
 static uint16_t timer[NUM_TIMERS];
 #define TIMER_LED_RED_ON timer[0]
 #define TIMER_LED_GREEN_ON timer[1]
@@ -67,6 +69,7 @@ static uint16_t timer[NUM_TIMERS];
 #define TIMER_RADIO_SEND timer[3]
 #define TIMER_ID_INPUT timer[4]
 #define TIMER_RADIO_FORWARD timer[5]
+#define TIMER_TEMP timer[6]
 
 
 //Variable 
@@ -82,7 +85,7 @@ static int led_red_flag;
 
 /* Protothread contexts */
 
-#define NUM_PT 3
+#define NUM_PT 4
 static struct pt pt[NUM_PT];
 
 /*
@@ -93,6 +96,8 @@ static char radio_tx_buffer[PKTLEN];
 static char radio_rx_buffer[PKTLEN];
 static int radio_rx_flag;
 static int periodic_send_flag;
+static int periodic_temp_flag;
+static int current_buffer_pt;
 
 /*
  * UART
@@ -108,7 +113,7 @@ static void printhex(char *buffer, unsigned int len)
     unsigned int i;
     for(i = 0; i < len; i++)
     {
-        printf("%02X ", buffer[i]);
+        printf("%02X ", (buffer[i]&0xFF));
     }
 }
 
@@ -119,19 +124,12 @@ static void init_message()
     {
         radio_tx_buffer[i] = 0x00;
     }
+    radio_tx_buffer[0] = (node_id>>8) &0xFF;
+    radio_tx_buffer[1] = node_id & 0xFF;
+    radio_tx_buffer[2] = 0x20;//hex code for SPACE char
+    current_buffer_pt = 3;
 }
 
-static void radio_send_message()
-{
-    led_green_on();
-    cc2500_utx(radio_tx_buffer, PKTLEN);
-    printf("sent: ");
-    printhex(radio_tx_buffer, PKTLEN);
-    putchar('\r');
-    putchar('\n');
-    led_green_off();
-    cc2500_rx_enter();
-}
 
 /* returns 1 if the id was expected and set, 0 otherwise */
 static void set_node_id(unsigned int id)
@@ -233,25 +231,25 @@ static char radio_tx_buffer[PKTLEN];
 static char radio_rx_buffer[PKTLEN];
 static int radio_rx_flag;
 
-/* to be called from within a protothread */
-static void send_temperature()
-{
-    init_message();
-    printf("Node id: %c%c\n", (node_id>>8) &0xFF,node_id & 0xFF);
 
-    int temperature = adc10_sample_temp();
-    printf("temperature: %d, hex: ", temperature);
-    printhex((char *) &temperature, 2);
+static void radio_send_message()
+{
+    //finish the sending buffer with a dot 
+    radio_tx_buffer[current_buffer_pt] = 0x2E; //dot hex code
+    current_buffer_pt = 0;
+    led_green_on();
+    cc2500_utx(radio_tx_buffer, PKTLEN);
+    printf("Node id: %c%c\n", (node_id>>8) &0xFF,node_id & 0xFF);//room number + sensor number 
+    printf("sent: ");
+    printhex(radio_tx_buffer, PKTLEN);
     putchar('\r');
     putchar('\n');
-    /* msp430 is little endian, convert temperature to network order */
-    char *pt = (char *) &temperature;
-    radio_tx_buffer[0] = node_id;
-    radio_tx_buffer[1] = pt[1];
-    radio_tx_buffer[2] = pt[0];
-    radio_send_message();
-
+    led_green_off();
+    cc2500_rx_enter();
 }
+
+
+
 
 void radio_cb(uint8_t *buffer, int size, int8_t rssi)
 {
@@ -295,6 +293,27 @@ void radio_cb(uint8_t *buffer, int size, int8_t rssi)
     cc2500_rx_enter();
 }
 
+
+/*
+ * TEMP SENSOR
+ */
+ 
+ /* to be called from within a protothread */
+static void register_temperature()
+{
+    
+    int temperature = adc10_sample_temp();
+    printf("temperature: %d, hex:", temperature);
+    printhex((char *) &temperature, 2);
+    putchar('\r');
+    putchar('\n');
+    /* msp430 is little endian, convert temperature to network order */
+    char *pt = (char *) &temperature;
+    radio_tx_buffer[current_buffer_pt++] = pt[1];
+    radio_tx_buffer[current_buffer_pt++] = pt[0];
+    
+}
+ 
 /*
  * UART
  */
@@ -309,10 +328,12 @@ int uart_cb(uint8_t data)
         uart_data = 0;
         uart_flag=1;
         periodic_send_flag=0;
+        periodic_temp_flag=0;
     }
     else if(data == 13 && uart_flag==1){ //13 is return/enter ascii code
         uart_flag=0;
         periodic_send_flag=1;
+        periodic_temp_flag=1;
     }
     else {
     	if(room_flag == 0){
@@ -357,8 +378,25 @@ static PT_THREAD(thread_periodic_send(struct pt *pt))
     {
         PT_WAIT_UNTIL(pt,periodic_send_flag==1);
         TIMER_RADIO_SEND = 0;
-        PT_WAIT_UNTIL(pt, node_id != NODE_ID_UNDEFINED && timer_reached( TIMER_RADIO_SEND, 100) && periodic_send_flag==1);
-        send_temperature();
+        init_message();
+        PT_WAIT_UNTIL(pt, node_id != NODE_ID_UNDEFINED && timer_reached( TIMER_RADIO_SEND, TIMER_SEND) && periodic_send_flag==1);
+        radio_send_message();
+    }
+
+    PT_END(pt);
+}
+
+
+static PT_THREAD(thread_periodic_temperature(struct pt *pt))
+{
+    PT_BEGIN(pt);
+
+    while(1)
+    {
+        PT_WAIT_UNTIL(pt,periodic_temp_flag==1);
+        TIMER_TEMP = 0;
+        PT_WAIT_UNTIL(pt, node_id != NODE_ID_UNDEFINED && timer_reached( TIMER_TEMP, TIMER_SENSING_TEMP) && periodic_temp_flag==1);
+        register_temperature();
     }
 
     PT_END(pt);
@@ -406,6 +444,7 @@ int main(int argc, char *argv[])
 
     /* ADC10 init (temperature) */
     adc10_start();
+    current_buffer_pt=0;
 
     /* radio init */
     spi_init();
@@ -423,6 +462,7 @@ int main(int argc, char *argv[])
     //Connection init
     uart_flag = 0;
     periodic_send_flag=1;
+    periodic_temp_flag=1;
     set_node_id(0);
 
     /* simple cycle scheduling */
@@ -430,5 +470,6 @@ int main(int argc, char *argv[])
         thread_led_red(&pt[0]);
         thread_uart(&pt[1]);
         thread_periodic_send(&pt[2]);
+        thread_periodic_temperature(&pt[3]);
     }
 }
