@@ -40,7 +40,7 @@
 /* 100 Hz timer A */
 #define TIMER_PERIOD_MS 10
 #define TIMER_SEND 1050
-#define TIMER_SENSING_TEMP 100
+#define TIMER_SENSING_TEMP 100 //10timer tick = 100ms so here its 100timer tick so 1sec
 
 #define PKTLEN 28
 #define MAX_HOPS 3
