@@ -1,6 +1,6 @@
-NAME		= msp_rx
+NAME		= msp_tx
 LIBS		= -lez430
-SRC		= msp_rx.c
+SRC		= msp_tx.c 
 SRC_DIR		= src
 INC_DIR		= -Iinc -Iprotothreads
 OUT_DIR		= bin

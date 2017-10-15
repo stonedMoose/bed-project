@@ -52,12 +52,12 @@
 
 #define NODE_ID_LOCATION INFOD_START
 
-#define NODE_ID_UNDEFINED 0x00
+#define NODE_ID_UNDEFINED 0x0000
 /* 10 seconds to reply to an id request */
 #define ID_INPUT_TIMEOUT_SECONDS 3
 /* the same in timer ticks */
 #define ID_INPUT_TIMEOUT_TICKS (ID_INPUT_TIMEOUT_SECONDS*1000/TIMER_PERIOD_MS)
-static unsigned char node_id;
+static unsigned int node_id;
 
 #define NUM_TIMERS 6
 static uint16_t timer[NUM_TIMERS];
@@ -99,7 +99,9 @@ static int periodic_send_flag;
  */
 
 static int uart_flag;
-static uint8_t uart_data;
+static uint16_t uart_data;
+static int room_flag;
+static uint8_t room;
 
 static void printhex(char *buffer, unsigned int len)
 {
@@ -132,24 +134,22 @@ static void radio_send_message()
 }
 
 /* returns 1 if the id was expected and set, 0 otherwise */
-static void set_node_id(unsigned char id)
+static void set_node_id(unsigned int id)
 {
     TIMER_ID_INPUT = UINT_MAX;
     if(id!=0){
         if(flash_write_byte((unsigned char *) NODE_ID_LOCATION, id) != 0)
         {
             flash_erase_segment((unsigned int *) NODE_ID_LOCATION);
-            flash_write_byte((unsigned char *) NODE_ID_LOCATION, id);
+            flash_write_word((unsigned int *) NODE_ID_LOCATION, id);
             node_id = id;
-            printhex(node_id,1);
-            printf("node id set to: %d\n", node_id);
+            printf("node id set to: %x\n", node_id);
         }
     } 
     else{
         /* retrieve node id from flash */
-        node_id = *((char *) NODE_ID_LOCATION);
-        printhex(node_id,1);
-        printf("node id retrieved from flash: %d\n", node_id);
+        node_id = *((unsigned int *) NODE_ID_LOCATION);
+        printf("node id retrieved from flash:  %x\n", node_id);
     }
 }
 
@@ -237,7 +237,7 @@ static int radio_rx_flag;
 static void send_temperature()
 {
     init_message();
-    printf("Node id: %d\n", node_id);
+    printf("Node id: %c%c\n", (node_id>>8) &0xFF,node_id & 0xFF);
 
     int temperature = adc10_sample_temp();
     printf("temperature: %d, hex: ", temperature);
@@ -302,18 +302,31 @@ void radio_cb(uint8_t *buffer, int size, int8_t rssi)
 
 int uart_cb(uint8_t data)
 {
-    if(data == 27 && uart_flag==0){
-        printf("Taper le nouvel id et pressez enter pour accepter\n");
+    
+    if(data == 27 && uart_flag==0){ //27 is ESC ascii code (decimal) 
+        printf("Enter new id starting with the room number and then the sensor number. Press enter to accept\n");
+        room_flag = 0;
+        uart_data = 0;
         uart_flag=1;
         periodic_send_flag=0;
     }
-    else if(data == 13 && uart_flag==1){
+    else if(data == 13 && uart_flag==1){ //13 is return/enter ascii code
         uart_flag=0;
         periodic_send_flag=1;
     }
     else {
-        printf("%c\n",data);
-        uart_data = data;       
+    	if(room_flag == 0){
+    		printf("room : %c (hex code : %x)\n",data, data);
+    		room = data;
+    		room_flag=1;
+    		
+    	}
+        else if (room_flag == 1){
+        	printf("sensor: %c (hex code : %x)\n",data,data);
+        	uart_data = ((room & 0xFF) <<8) | (data & 0xFF) ;
+        	//printf("uart_data : %x \n",uart_data);
+        	room_flag = 0;
+        }      
     }
         
     return 0;
@@ -387,7 +400,9 @@ int main(int argc, char *argv[])
     uart_init(UART_9600_SMCLK_8MHZ);
     uart_register_cb(uart_cb);
     uart_flag = 0;
-    uart_data = 0;
+    uart_data = 0x0000;
+    room = 0;
+    room_flag = 0;
 
     /* ADC10 init (temperature) */
     adc10_start();
